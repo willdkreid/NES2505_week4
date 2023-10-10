@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<meta name="progressive" content="false" />
+<meta name="allow-skip" content="false" />
+<meta name="learnr-version-prerender" content="0.11.4" />
+
+<title>Count, proportion and presence / absence response variables</title>
+
+<!-- header-includes START -->
+<!-- HEAD_CONTENT -->
+<!-- header-includes END -->
+<!-- HEAD_CONTENT -->
+
+<!-- highlightjs -->
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+<!-- taken from https://github.com/rstudio/rmarkdown/blob/de8a9c38618903627ca509f5401d50a0876079f7/inst/rmd/h/default.html#L293-L343 -->
+<!-- tabsets -->
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+<!-- end tabsets -->
+
+
+</head>
+
+<body>
+<a class='sr-only sr-only-focusable visually-hidden-focusable' href='#learnr-tutorial-content'>Skip to Tutorial Content</a>
+
+
+
+<div class="pageContent band">
+<main class="bandContent page">
+
+<article class="topics" id="learnr-tutorial-content">
+
+<div id="section-introduction" class="section level2">
+<h2>Introduction</h2>
+<div id="section-linear-models" class="section level3">
+<h3>Linear models</h3>
+<p>In the last two weeks, we have been looking at linear models using
+<code>lm()</code>. The response data you’ve looked at has been
+continuous numerical data, potentially with decimal points.</p>
+</div>
+<div id="section-data-types" class="section level3">
+<h3>Data types</h3>
+<p>Your response variable may not always be a continuous numerical one.
+In biology you may be dealing with the numbers of birds in a wood (whole
+numbers), percentage of crop damage by a pathogen (bounded 0 to 100) or
+dead/alive (categorical data). Thinking about your data type allows you
+to improve your standard linear model with a “generalised” linear model
+that can cope with these types of responses:</p>
+<ul>
+<li><strong>Continuous data</strong>
+<ul>
+<li>These could be positive or negative, and include decimal points,
+2.45, 5.01, -3.78, 2.00. Examples might include temperate (degrees
+Centigrade).</li>
+</ul></li>
+<li><strong>Whole number data, bounded by zero</strong>
+<ul>
+<li>These are often count data, 4, 12, 0, 234. Examples might include
+the number of hedgehogs seen at a site.</li>
+</ul></li>
+<li><strong>Proportion or percentage data, 0 to 1, or 0 to 100</strong>
+<ul>
+<li>These values can have decimals, but are bounded between 0 and 1 (or
+0 and 100 for percentages). Usually analysed as proportions. 0.23, 0.15,
+0.98 etc. Can arise in lots of experiments, e.g. proportion of insects
+killed by a new pesticide</li>
+</ul></li>
+<li><strong>Binary categorical data</strong>
+<ul>
+<li>Two categories present, often coded as 0 or 1. Again wide occurrence
+in biology: dead/alive, present/absent, resistant/susceptible etc.</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="section-assumptions-of-linear-model" class="section level2">
+<h2>Assumptions of linear model</h2>
+<p>Linear models assume that our response is a continuous numerical
+variable, and the model produces normally-distributed residuals with
+homogeneity of variance. Continuous numerical data can take any value,
+could be either positive and negative and run from -infinity to
++infinity. Thus our model is of the form:</p>
+<p><span class="math inline">\(\text{Response variable} =
+\text{Explanatory variable(s)} + Error\)</span></p>
+<p>and when your response is a continuous numerical variable then it is
+assumed that a histogram of your errors would produce a normal
+(Gaussian) or bell-shaped curve.</p>
+<div id="section-three-key-types-of-error-distribution"
+class="section level3">
+<h3>Three key types of error distribution</h3>
+<p>When we move from a linear model to using a GLM, we will need to
+think about changing the distribution we use or are assuming from our
+data. If we undertake a GLM using a Gaussian distribution this is very
+similar to just doing a linear model. The reason to switch to a GLM is
+because it allows us to work in a generalised framework with other
+distributions. The two other distributions you are most likely to need
+as biologists are the Poisson distribution for counts named after Simeon
+Poisson (French mathematician), and the Binomial distribution for
+proportion 1/0 or presence/absence data (no-one seems to have claimed
+credit for this one!).</p>
+<ul>
+<li>Gaussian (normal) distribution: classic bell-shaped curve, used for
+<strong>continuous</strong> response</li>
+<li>Poisson distribution: <strong>whole number count</strong>
+response</li>
+<li>Binomial distribution: <strong>proportion</strong> or a
+<strong>binary categorical</strong> response</li>
+</ul>
+</div>
+<div id="section-generalised-linear-models" class="section level3">
+<h3>Generalised linear models</h3>
+<p>These are an extension of the standard linear model that you have
+already used. They are called with the <code>glm()</code> function, and
+can handle Gaussian, Poisson and Binomial error distributions. Before we
+look in detail at how <code>glm()</code> work, we will refresh our
+memory on the Gaussian (normal) distribution, and introduce the Poisson
+and Binomial distributions using interactive controls.</p>
+<p>Let’s have a quick look at all three distributions and hopefully this
+will become clearer.</p>
+</div>
+</div>
+<div id="section-normal-distribution" class="section level2">
+<h2>Normal distribution</h2>
+<p>This statistical distribution is named after a 19th Century German
+mathematician, Friederick Gauss. There are two ‘parameters’ to a normal
+distribution, the mean and the standard deviation. Conveniently, 95% of
+the data will fall within + or - 1.96 (i.e. approximately 2) standard
+deviations.</p>
+<p>The interactive tool below will let you change the mean and the
+standard deviation so you can see how these two parameters alter the
+position along the x-axis and shape of the normal distribution alogn the
+x- and y-axes. The blue line represents a fitted curve over the
+histogram according to the Gaussian distribution which will help you
+visualise the bell-shape.</p>
+<h2>The normal (Gaussian) distribution</h2>
+<div class="row">
+<div class="col-sm-4">
+<form class="well" role="complementary">
+<div class="form-group shiny-input-container">
+<label class="control-label" id="mean-label" for="mean">Mean</label>
+<input class="js-range-slider" id="mean" data-skin="shiny" data-min="0" data-max="100" data-from="50" data-step="1" data-grid="true" data-grid-num="10" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number"/>
+</div>
+<div class="form-group shiny-input-container">
+<label class="control-label" id="sd-label" for="sd">Standard deviation</label>
+<input class="js-range-slider" id="sd" data-skin="shiny" data-min="0.1" data-max="10" data-from="5" data-step="0.1" data-grid="true" data-grid-num="9.9" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number"/>
+</div>
+</form>
+</div>
+<div class="col-sm-8" role="main">
+<div class="shiny-plot-output html-fill-item" id="gauss_plot" style="width:100%;height:400px;"></div>
+</div>
+</div>
+<p><strong>Comments</strong> You should have seen the following changes
+to the plot when you adjusted the mean and standard deviation:</p>
+<ul>
+<li>as you increase or decrease the mean, the distribution moves to the
+left or the right, but remains roughly the same shape</li>
+<li>a low standard deviation results in the values being packed together
+while a high standard deviation flattens and spreads the curve</li>
+</ul>
+</div>
+<div id="section-poisson-distribution" class="section level2">
+<h2>Poisson distribution</h2>
+<p>Often biologists and ecologists collect data in the form of counts
+e.g. the number of birds in wood, or number of bacterial colonies on a
+Petri dish. These numbers are whole numbers or integers and cannot be
+negative values or have decimal points. This means that our distribution
+cannot include numbers less than zero. The Poisson distribution allows
+us to model count data. It takes a parameter <span
+class="math inline">\(\lambda\)</span> (Greek letter lambda) which
+adjusts the shape of this distribution. Try mvoing the the interactive
+slider left and right to see what happens to the size and shape of the
+distribution:</p>
+<h2>The Poisson distribution for whole-number counts</h2>
+<div class="row">
+<div class="col-sm-4">
+<form class="well" role="complementary">
+<script>if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);</script>
+<div class="form-group shiny-input-container">
+<label class="control-label" id="lambda-label" for="lambda">\(\lambda\) (lambda)</label>
+<input class="js-range-slider" id="lambda" data-skin="shiny" data-min="1" data-max="100" data-from="50" data-step="1" data-grid="true" data-grid-num="9.9" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number"/>
+</div>
+</form>
+</div>
+<div class="col-sm-8" role="main">
+<div class="shiny-plot-output html-fill-item" id="poiss_plot" style="width:100%;height:400px;"></div>
+</div>
+</div>
+<p>You should have seen the following things happen to the distribution
+when you moved the slider:</p>
+<ul>
+<li>When <span class="math inline">\(\lambda\)</span> is high, you’ll
+see that the Poisson distribution looks fairly similar to a normal
+distribution, except with whole numbers. However as <span
+class="math inline">\(\lambda\)</span> gets smaller, the distribution
+gets <strong><em>squashed</em></strong> to the left, as it cannot have
+any values below zero.</li>
+<li>The histogram is shown slightly differently, as we are dealing with
+whole number counts.</li>
+</ul>
+</div>
+<div id="section-binomial-distribution" class="section level2">
+<h2>Binomial distribution</h2>
+<p>There are times when you will collect data that has a binary
+response. This could be:</p>
+<ul>
+<li>dead / alive</li>
+<li>present / absent</li>
+<li>true / false</li>
+<li>proportion or percentage data</li>
+</ul>
+<p>The main parameter is the probability of “success” on each “trial”.
+So if you toss a (fair) coin your probability of a head should be 0.5.
+You might do an experiment where you have 25 replicates, in each of
+which you try and germinate 10 seeds. The “size” of each replicate is
+10, and you would have a count of the numbers of seeds germinated or
+failed in each replicate.</p>
+<p>Below, we have the simplest setup, 25 replicates, with each of size
+one (which produces a very simple plot). Adjust the size of each
+replicate, which is equivalent to the number of seeds per replicate in
+the example above, and the probability of success, equivalent to the
+probability of germination.</p>
+<p>In the interactive demonstration below, we have the simplest setup,
+25 replicates, with each of size one (which produces a very simple
+plot). Before you adjust the sliders, the sample size is only 1
+(e.g. one seed per) replicate, and the probability (of germination) is
+0.5. Therefore roughly half of your 25 replicates will fall into the 0
+(no germination) category, and half into the 1.0 (germination) category.
+Adjust the size of each replicate, which is equivalent to the number of
+seeds per replicate in this example, and the probability of success,
+equivalent to the probability of germination.</p>
+<h2>The binomial distribution</h2>
+<div class="row">
+<div class="col-sm-4">
+<form class="well" role="complementary">
+<div class="form-group shiny-input-container">
+<label class="control-label" id="size-label" for="size">Size of each trial (e.g. number of seeds per replicate)</label>
+<input class="js-range-slider" id="size" data-skin="shiny" data-min="1" data-max="50" data-from="1" data-step="1" data-grid="true" data-grid-num="9.8" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number"/>
+</div>
+<div class="form-group shiny-input-container">
+<label class="control-label" id="prob-label" for="prob">Probability of success (e.g. probability of seed germination)</label>
+<input class="js-range-slider" id="prob" data-skin="shiny" data-min="0" data-max="1" data-from="0.5" data-step="0.01" data-grid="true" data-grid-num="10" data-grid-snap="false" data-prettify-separator="," data-prettify-enabled="true" data-keyboard="true" data-data-type="number"/>
+</div>
+</form>
+</div>
+<div class="col-sm-8" role="main">
+<div class="shiny-plot-output html-fill-item" id="binom_plot" style="width:100%;height:400px;"></div>
+</div>
+</div>
+<p>You should have observed the following:</p>
+<ul>
+<li>As you increase the number of seeds per replicate (maximum of 50)
+you will see additional whole numbers appearing on the horizontal axis,
+representing the numbers of successes (e.g. germinating seeds)</li>
+<li>the total of all the vertical axes is always 25, which is the total
+number of replicates in this example.</li>
+</ul>
+</div>
+<div id="section-how-to-generalise" class="section level2">
+<h2>How to generalise</h2>
+<div
+id="section-how-do-generalised-linear-models-extend-the-standard-linear-model"
+class="section level3">
+<h3>How do generalised linear models extend the standard linear
+model?</h3>
+<p>You have already come across the basic syntax for linear models
+of:</p>
+<p><span class="math display">\[Response = \text{Explanatory
+variable(s)} + Error\]</span> where your explanatory variables are
+typically treatments, or environmental measures, and your <span
+class="math inline">\(Error\)</span> is unknown variation or noise. A
+linear model assumes that the <span class="math inline">\(Error\)</span>
+is normally distributed. This makes it relatively simple to make a link
+from predictions calculated from your explanatory variable(s) to your
+response.</p>
+<p>Take a simple example, such as a ‘regression’ linear model, where you
+have a continuous response variable <span
+class="math inline">\(y\)</span> and a continuous explanatory variable
+<span class="math inline">\(x\)</span>. The form of the model can then
+be expressed as:</p>
+<p><span class="math display">\[y = a + b.x + \epsilon\]</span></p>
+<p>Where</p>
+<ul>
+<li><span class="math inline">\(y\)</span> = response variable, measured
+on a continuous scale (decimals allowed)</li>
+<li><span class="math inline">\(x\)</span> = explanatory variable, in a
+regression this is continuous</li>
+<li><span class="math inline">\(a\)</span> = intercept (where the fitted
+regression line crosses the vertical axis)</li>
+<li><span class="math inline">\(b\)</span> = gradient of fitted
+line</li>
+<li><span class="math inline">\(\epsilon\)</span> = unknown variation or
+noise in your data</li>
+</ul>
+<p>When you create a linear model, the <code>lm()</code> function
+estimates the intercept and slope parameters, to predict the response
+values as accurately as possible. The above equation is often written
+as:</p>
+<p><span class="math display">\[y = \beta_0 + \beta_1x +
+\epsilon\]</span> where</p>
+<ul>
+<li><span class="math inline">\(\beta_0\)</span> = intercept</li>
+<li><span class="math inline">\(\beta_1\)</span> = slope</li>
+</ul>
+<p>This second style of writing has the advantage that it can be
+extended to multiple explanatory variables, that might be continuous,
+and/or categorical.</p>
+<p><span class="math display">\[y = \sum_{j=1}^{p} \beta_jx_j +
+\epsilon\]</span> where</p>
+<ul>
+<li><span class="math inline">\(p\)</span> = the number of explanatory
+variables</li>
+<li><span class="math inline">\(j\)</span> = a counter</li>
+<li><span class="math inline">\(\sum\)</span> = Greek letter Epsilon
+which indicates to go through each of the next calculations and add the
+results together</li>
+<li><span class="math inline">\(\beta_jx_j\)</span> = multiply
+parameter. e.g. in the simple regression example we only have two
+parameters (<span class="math inline">\(p = 2\)</span>): <span
+class="math inline">\(\beta_0\)</span> the intercept (which is multipled
+by 1.0) and <span class="math inline">\(\beta_1\)</span> the slope,
+which is multiplied by the explanatory variable <span
+class="math inline">\(x_1\)</span>.</li>
+</ul>
+</div>
+<div id="section-the-need-for-a-link-function" class="section level3">
+<h3>The need for a link function</h3>
+<p>I mentioned in passing that we need to make our predictions and link
+them back to the explanatory variable. This is straightforward if we
+have a normal (Gaussian) distribution, but is complex for Binomial,
+Poisson and other distributions. Therefore in a generalised linear model
+or GLM, we calculate an <strong>intermediate</strong> value, which is
+then “linked” back to the response variable. We call this intermediate
+variable <span class="math inline">\(\eta\)</span> (Greek letter eta).
+So our equation now becomes:</p>
+<p><span class="math display">\[\eta = \sum_{j=1}^{p} \beta_jx_j +
+\epsilon\]</span></p>
+</div>
+<div id="section-how-to-link-back-to-the-response"
+class="section level3">
+<h3>How to link back to the response</h3>
+<p>How do we then calculate <span class="math display">\[y =
+\eta\]</span> There are 3 link functions which we need to know about,
+for now, which relate to the 3 distributions we have been through:</p>
+<ul>
+<li>identity = when we need to use a normal (Gaussian) distribution.
+This is used with the linear models we have already discussed earlier in
+this course. No transformation needed to convert <span
+class="math inline">\(\eta\)</span> to <span
+class="math inline">\(y\)</span>.</li>
+<li>log link = when we need to use a Poisson distribution and we have
+count data. This uses natural logs rather than logs to base 10 to model
+the response variable.</li>
+<li>logit link = when we need to use a binomial distribution and our
+response variable is binary. This is a little more complex, but R sets
+it automatically.</li>
+</ul>
+<p>Fortunately, R’s <code>glm()</code> function automatically picks the
+correct transformation for the link function.</p>
+</div>
+<div id="section-do-i-need-to-worry-about-this" class="section level3">
+<h3>Do I need to worry about this?</h3>
+<p>On a day-to-day basis, no (which is why I have avoided too many
+equations)! But it does have a few impacts that you should be alert to,
+that we will discuss as we work through examples:</p>
+<ul>
+<li>Least squares no longer used. The method for estimating the
+parameters changes from sums of squares etc. to a technique called
+‘maximum likelihood’. Instead of t-statistics for each parameter, you
+will see z-statistics displayed.</li>
+<li>You will no longer see an R-squared value. Instead, something called
+the Akaike Information Criterion (AIC) will show for each
+<code>glm()</code> model. The <strong>lower</strong> the AIC the
+better.</li>
+<li>Instead of sums of squares (SS) the <code>glm()</code> produces a
+<strong>deviance</strong> which can be thought of as a ‘generalised’
+SS.</li>
+<li>If making predictions for new data based on Poisson or Binomial
+errors, you need an extra step to account for the link function.</li>
+</ul>
+</div>
+<div id="section-the-output-looks-different---why"
+class="section level3">
+<h3>The output looks different - why?</h3>
+<p>When you use <code>glm()</code> rather than <code>lm()</code> you’ll
+notice your model <code>summary()</code> is displayed slightly
+differently. That is because <code>glm()</code> uses something called
+“maximum-likelihood” when estimating parameters. You don’t need to know
+the complex mathematics behind this (phew!) but there is a very
+accessible description of the basic at <a
+href="https://academic.oup.com/book/27290/chapter/196938074">Getting
+Started with R: introduction for biologists</a> Chapter 7.</p>
+</div>
+</div>
+<div id="section-glm-with-count-data" class="section level2">
+<h2>GLM with count data</h2>
+<div id="section-what-goes-wrong-with-lm" class="section level3">
+<h3>What goes wrong with <code>lm()</code>?</h3>
+<p>We’ll begin by looking at a simple example of the numbers of species
+of aquatic invertebrates in rivers with different levels of pollution.
+Aquatic invertebrates can be very sensitive to water pollution, and are
+useful <strong>bio-indicators</strong> of pollution events etc.</p>
+<p><img src="GLM_files/figure-html/river.jpg" /></p>
+<p>An advanced system has now been developed by the Centre for Ecology
+and Hydrology that is used by the Envionment Agency to assess river
+quality, called
+<a href="https://www.ceh.ac.uk/services/rivpacs-reference-database"
+target="_blank">RIVPACS</a>. We will, however, just look at a simple set
+of species counts and pollution.</p>
+<p>The data are in a data.frame called <code>sppcount</code>. Begin by
+creating a scatterplot of the data, run a linear model, examine its
+summary table, and look at the plots of residuals and QQ plot.
+<strong>Hints:</strong> Use <code>gf_point()</code> for the scatterplot,
+for the <code>lm()</code> make sure you have your response and
+explanatory variables the right way round. Use
+<code>mplot(spp_count_lm, which=1:2)</code> to check diagnostic the
+residuals and QQ plots with <code>ggplot2</code> graphs or
+<code>plot(spp_count_lm, which=1:2</code> for basic graphs.</p>
+<div class="tutorial-exercise" data-label="sppcount_lm"
+data-completion="1" data-diagnostics="1" data-startover="1"
+data-lines="0">
+<script type="application/json" data-ui-opts="1">{"engine":"r","has_checker":false,"caption":"<span data-i18n=\"text.enginecap\" data-i18n-opts=\"{&quot;engine&quot;:&quot;R&quot;}\">R Code<\/span>"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="sppcount_lm-solution"
+data-completion="1" data-diagnostics="1" data-startover="1"
+data-lines="0">
+<pre class="text"><code># Create scatterplot
+gf_point(species ~ pollution, data=sppcount)
+
+# Create linear model, check coefficients and R-squared
+sppcount_lm &lt;- lm(species~pollution, data=sppcount)
+summary(sppcount_lm)
+
+# Display first two diagnostic plots
+mplot(sppcount_lm, which=1:2)</code></pre>
+</div>
+<p>At first site the linear model looks quite good, with a highly
+significant negative effect of pollution on the count of species, and
+the model explains almost 80% of the variation. However, there are two
+clues that something is amiss:</p>
+<ol style="list-style-type: decimal">
+<li>The QQ plot has a distinct S-shape to it</li>
+<li>What is the species count at high levels of pollution.</li>
+</ol>
+<p>We can check the latter by plotting the fitted line onto our
+scatterplot, and we can also calculate a predicted number of species for
+a given amount of water pollution. As this is a <strong>linear
+model</strong> the line function does not do anything, so we can use the
+simple <code>predict()</code> function to obtain a predicted spp
+count.</p>
+<p>In the box below, create a scatterplot with the fitted line, and
+check the number of species at a pollution level of about 15. You can
+extend the range of your x-axis in your plot by adding the
+<code>gf_lim(x = c(0, 15))</code> option.</p>
+<div class="tutorial-exercise" data-label="sppcount_lm_predict"
+data-completion="1" data-diagnostics="1" data-startover="1"
+data-lines="0">
+<pre class="text"><code>sppcount_lm &lt;- lm(species ~ pollution, data = sppcount)</code></pre>
+<script type="application/json" data-ui-opts="1">{"engine":"r","has_checker":false,"caption":"<span data-i18n=\"text.enginecap\" data-i18n-opts=\"{&quot;engine&quot;:&quot;R&quot;}\">R Code<\/span>"}</script>
+</div>
+<div class="tutorial-exercise-support"
+data-label="sppcount_lm_predict-solution" data-completion="1"
+data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>gf_point(species ~ pollution, data = sppcount) %&gt;% 
+  gf_lims(x = c(0, 15)) %&gt;% 
+  gf_lm()</code></pre>
+</div>
+<p>We have a problem. From roughly pollution=12.5 onwards we are getting
+<strong>negative</strong> numbers of species, which obviously cannot
+happen. To solve the problem, we’ll repeat the analysis, but as a
+generalised linear model.</p>
+</div>
+<div id="section-correct-analysis-with-glm-function"
+class="section level3">
+<h3>Correct analysis with <code>glm()</code> function</h3>
+<p>Now let’s analyse these using GLM instead using the correct
+distribution and link function. R will automatically pick the correct
+transformation for the link function but we will state it explicitly to
+help you connect the statistical distribution to the appropriate link
+function. You will also see where you would need to state it when
+writing the R code. We need to alter slightly what we put into the
+model:</p>
+<p><code>glm(response ~ explanatory, family = distribution(link ="X"), data =  data_set)</code></p>
+<p>You can see an extra term in the model which is <code>family =</code>
+that relates to the distribution we will be using and specifies the link
+function. Since we are using count data, the correct distribution we
+will need to use is the Poisson distribution and the link function will
+be log. Thinking about the linear model which you just created, simply
+replace your original <code>lm()</code> function with <code>glm()</code>
+and add <code>family = poisson(link = "log")</code>. Again display the
+model <code>summary()</code> and diagnostic plots via
+<code>plot()</code>.</p>
+<div class="tutorial-exercise" data-label="sppcount_glm"
+data-completion="1" data-diagnostics="1" data-startover="1"
+data-lines="0">
+<script type="application/json" data-ui-opts="1">{"engine":"r","has_checker":false,"caption":"<span data-i18n=\"text.enginecap\" data-i18n-opts=\"{&quot;engine&quot;:&quot;R&quot;}\">R Code<\/span>"}</script>
+</div>
+<div class="tutorial-exercise-support"
+data-label="sppcount_glm-solution" data-completion="1"
+data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code># Create scatterplot
+gf_point(species ~ pollution, data=sppcount)
+
+# Create linear model, check coefficients and R-squared
+sppcount_glm &lt;- glm(species~pollution, family = poisson(link = &quot;log&quot;), data=sppcount)
+summary(sppcount_glm)
+
+# Display first two diagnostic plots
+mplot(sppcount_glm, which=1:2)</code></pre>
+</div>
+<p><strong>Key points from output of <code>glm()</code>
+model</strong></p>
+<ul>
+<li>The summary table again shows pollution as significant. Instead of
+an R-squared value there is an AIC. When comparing models the lower the
+AIC the better.</li>
+<li>The QQ plot has an S-shaped curve, but this is less than before:
+compare the range of values on the y-axis of the QQ plot for the
+<code>lm()</code> and <code>glm()</code></li>
+</ul>
+</div>
+<div id="section-writing-up-the-results" class="section level3">
+<h3>Writing up the results</h3>
+<p>The output from your summary is slightly different from
+<code>lm()</code>. To write the above model up I would write something
+similar to “There was a significant negative effect of pollution on
+species richness (AIC = 163.76, z = -7.165, p &lt; 0.001)”. Several
+schema are acceptable for reporting GLMs, but this is probably the most
+common.</p>
+<div class="panel panel-default tutorial-question-container">
+<div data-label="lm_v_glm" class="tutorial-question panel-body">
+<div id="lm_v_glm-answer_container" class="shiny-html-output"></div>
+<div id="lm_v_glm-message_container" class="shiny-html-output"></div>
+<div id="lm_v_glm-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+</div>
+<div id="section-adding-the-correct-fitted-line" class="section level3">
+<h3>Adding the correct fitted line</h3>
+<p>You’ll recall that GLMs use <strong>link</strong> functions to
+connect the response data to the explanatories, that account for the
+appropriate characteristics of the response data. Where the response
+data are continuous and <code>lm()</code> can be used, the link function
+does not do anything, hence it is known as the “identity”. However, for
+Posson (and binomial) distributions, we need to take this into
+account.</p>
+<p>Poisson (count) distributions use the log-link. We could therefore
+take the antilog of our predictions to get back to the values for our
+fitted line. Since the <code>glm()</code> uses natural logarithms, often
+shown as <span class="math inline">\(ln\)</span> or <span
+class="math inline">\(log_e\)</span>, the antilog is the exponent. Hence
+<span class="math inline">\(ln(x)\)</span> is <span
+class="math inline">\(e^x\)</span>. R has the function
+<code>exp()</code> to take the antilogarithm.</p>
+<p>However, this is a little complex to implement, so we are going to
+use a slightly easier method, based on the <code>mosaic</code> package.
+The <code>mosaic</code> package’s default <code>plotModel()</code>
+function will allow you to see the GLM model and original points:</p>
+<pre class="r"><code>sppcount_glm &lt;- glm(species~pollution, family = &quot;poisson&quot;, data=sppcount)
+gf_point(species~pollution, data=sppcount) %&gt;% 
+  gf_smooth(method = &quot;glm&quot;, method.args = list(family=&quot;poisson&quot;), se=TRUE)</code></pre>
+<p><img src="NES2505_GLM_files/figure-html/glm_plot_v2-1.png" width="624" /></p>
+<p>To see what happens when we extend the x-axis to 15.0 (which you
+recall gave <strong>negative</strong> species counts with the
+<code>lm()</code> model, we can extend the limits of the x-axis).</p>
+<pre class="r"><code>gf_point(species~pollution, data=sppcount) %&gt;% 
+  gf_lims(x = c(0, 15)) %&gt;% 
+  gf_smooth(method=&quot;glm&quot;, method.args = list(family=&quot;poisson&quot;), fullrange=TRUE, se=TRUE)</code></pre>
+<p><img src="NES2505_GLM_files/figure-html/glm_plot_extended-1.png" width="624" /></p>
+<p>The above code is a little more complex. We use
+<code>gf_smooth()</code> to add the predicted model curve, with
+arguments to explain that a GLM with Poisson distribution should be
+used. The <code>fullrange=TRUE</code> forces the fitted line to go
+beyond the range of the data. This <strong>extrapolation</strong> is
+<strong>NOT</strong> normally recommended (you can see the SE bars are
+bigger at the ends of the line). However, I have done it here just to
+demonstrate that the predicted number of species no longer drops to
+unrealistic negative values.</p>
+</div>
+<div
+id="section-making-a-prediction-for-a-specific-value-of-water-pollution"
+class="section level3">
+<h3>Making a prediction for a specific value of water pollution</h3>
+<p>Suppose you want to make a prediction of the expected number of
+species when the pollution is at 3.64 mg/l. This can be easily done by
+creating a <strong>model function</strong> from your <code>glm</code>
+using the <code>makeFun()</code> command, and then giving it a
+number:</p>
+<pre class="r"><code>sppcount_glm &lt;- glm(species~pollution, family = &quot;poisson&quot;, data=sppcount)
+sppcount_fit &lt;- makeFun(sppcount_glm)
+sppcount_fit(pollution = 3.64)</code></pre>
+<pre><code>##        1 
+## 18.73928</code></pre>
+<p>Don’t worry that the predicted value includes decimal points; this is
+quite acceptable in a GLM. It is how you set it up originally that
+matters. If you want, you can calculate the Standard Error (SE) of your
+predicted value:</p>
+<pre class="r"><code>sppcount_glm &lt;- glm(species~pollution, family = &quot;poisson&quot;, data=sppcount)
+sppcount_fit &lt;- makeFun(sppcount_glm)
+sppcount_fit(pollution = 3.64, se.fit=TRUE)</code></pre>
+<pre><code>## $fit
+##        1 
+## 18.73928 
+## 
+## $se.fit
+##         1 
+## 0.8181217 
+## 
+## $residual.scale
+## [1] 1</code></pre>
+</div>
+</div>
+<div id="section-glm-with-binary-data" class="section level2">
+<h2>GLM with binary data</h2>
+<p>You will often have data in the form of dead/alive, present/absence,
+or 0/1 and these can be analysed with a GLM with
+<strong>binomial</strong> errors. You will often see this type of
+analysis described as a <strong>logistic regression</strong> in
+textbooks, and it typically produces an <strong>S-shaped</strong> curve,
+rising or falling depending on your dataset, rather than a straight
+line.</p>
+<div id="section-lichen-presence-or-absence" class="section level3">
+<h3>Lichen presence or absence</h3>
+<p>Lichens are very sensitive to air pollution, and are another type of
+bioindicator. The presence or absence of lichens on trees is a good
+indication of the amount of atmospheric pollution.</p>
+<p><img src="GLM_files/figure-html/lichen.jpeg" /></p>
+<p>However, their incidence is also affected by the pH of the bark of
+the tree on which they might grow. Therefore this dataset includes not
+only the amount of air pollution, but also the calcium content in the
+bark:</p>
+<pre class="r"><code>summary(lichens_dat)</code></pre>
+<pre><code>##      lichen        calcium         airpoll     
+##  Min.   :0.00   Min.   :0.153   Min.   :2.023  
+##  1st Qu.:0.00   1st Qu.:2.248   1st Qu.:4.823  
+##  Median :1.00   Median :4.170   Median :5.801  
+##  Mean   :0.58   Mean   :4.319   Mean   :5.856  
+##  3rd Qu.:1.00   3rd Qu.:6.431   3rd Qu.:7.191  
+##  Max.   :1.00   Max.   :9.269   Max.   :9.577</code></pre>
+<pre class="r"><code>head(lichens_dat)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["lichen"],"name":[1],"type":["int"],"align":["right"]},{"label":["calcium"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["airpoll"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"7.928","3":"3.317","_rn_":"1"},{"1":"0","2":"1.925","3":"7.554","_rn_":"2"},{"1":"1","2":"2.045","3":"5.883","_rn_":"3"},{"1":"0","2":"4.781","3":"5.932","_rn_":"4"},{"1":"0","2":"1.536","3":"5.308","_rn_":"5"},{"1":"1","2":"7.369","3":"4.934","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<div class="panel panel-default tutorial-question-container">
+<div data-label="recode" class="tutorial-question panel-body">
+<div id="recode-answer_container" class="shiny-html-output"></div>
+<div id="recode-message_container" class="shiny-html-output"></div>
+<div id="recode-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+</div>
+<div id="section-visualising-the-data" class="section level3">
+<h3>Visualising the data</h3>
+<p>In general, it is useful to quickly visualise the data before you
+analyse them. A good summary is a boxplot, but by default that would put
+our response variable on the horizontal axis. By default the
+<code>gf_boxplot()</code> function expects a continuous variable to the
+left of the <code>~</code> sign, and a categorical one on the right.
+However, we can rotate the boxplot on its side using the
+<code>gf_refine(coord_flip())</code> option.</p>
+<div class="tutorial-exercise" data-label="boxplot_calcium"
+data-completion="1" data-diagnostics="1" data-startover="1"
+data-lines="0">
+<pre class="text"><code># Create a factor for the lichen presence/absence
+lichens_dat$lichen_fct &lt;- as.factor(lichens_dat$lichen)
+summary(lichens_dat) # lichen_fct presence/absence now scores as 0/1 factor
+
+gf_boxplot(calcium ~ lichen_fct, data=lichens_dat) %&gt;% 
+  gf_refine(coord_flip()) # Flips horizontally. Note double-bracket</code></pre>
+<script type="application/json" data-ui-opts="1">{"engine":"r","has_checker":false,"caption":"<span data-i18n=\"text.enginecap\" data-i18n-opts=\"{&quot;engine&quot;:&quot;R&quot;}\">R Code<\/span>"}</script>
+</div>
+<p>In the R code box below, create a boxplot for the air pollution. Try
+improving your graph by changing the title of the lichen axis to
+“Presence or absence of lichens”, and change “airpoll” to read “Air
+pollution”. <strong>Hint</strong>: Use the <code>gf_labs()</code>
+function to give a customised label; the <code>x=</code> and
+<code>y=</code> options operate <strong>before</strong> you flip the
+boxplot.</p>
+<div class="tutorial-exercise" data-label="boxplot_airpoll"
+data-completion="1" data-diagnostics="1" data-startover="1"
+data-lines="0">
+<script type="application/json" data-ui-opts="1">{"engine":"r","has_checker":false,"caption":"<span data-i18n=\"text.enginecap\" data-i18n-opts=\"{&quot;engine&quot;:&quot;R&quot;}\">R Code<\/span>"}</script>
+</div>
+<div class="tutorial-exercise-support"
+data-label="boxplot_airpoll-solution" data-completion="1"
+data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>lichens_dat$lichen_fct &lt;- as.factor(lichens_dat$lichen)
+
+gf_boxplot(airpoll ~ lichen_fct, data=lichens_dat) %&gt;% 
+  gf_labs(x = &quot;Presence or absence of lichen&quot;, y = &quot;Air pollution&quot;) %&gt;% 
+  gf_refine(coord_flip())</code></pre>
+</div>
+</div>
+<div id="section-setting-up-a-binomial-glm" class="section level3">
+<h3>Setting up a binomial GLM</h3>
+<p>The boxplots suggest that lichens are more abundant at high calcium
+and low air pollution. The GLM model is actually going to try and fit a
+curve to data of this form:</p>
+<pre class="r"><code># As the GLM will predict a probability between 0 and 1, we will use the original
+# lichen variable as the response, not the categorical  lichen_fct
+gf_point(lichen ~ calcium, data=lichens_dat)</code></pre>
+<p><img src="NES2505_GLM_files/figure-html/lichen_points-1.png" width="624" /></p>
+<p><strong>Note:</strong> if you have a lot of data, and the points
+overlap too much to view clearly, it can be useful to show them as
+‘jittered points’ using <code>gf_jitter()</code></p>
+<pre class="r"><code># The height option controls how much &#39;jitter&#39; occurs
+gf_jitter(lichen ~ calcium, data=lichens_dat, height=0.05)</code></pre>
+<p><img src="NES2505_GLM_files/figure-html/lichen_jitter-1.png" width="624" /></p>
+<p>We can now create the binomial GLM, using the two ‘main effects’ of
+<code>calcium</code> and <code>airpoll</code>, and also the interaction
+term. Remember that the summary table shows deviance and AIC.</p>
+<pre class="r"><code>lichen_glm1 &lt;- glm(lichen ~ calcium + airpoll + calcium:airpoll, family=binomial(link = &quot;logit&quot;), data=lichens_dat)
+summary(lichen_glm1)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = lichen ~ calcium + airpoll + calcium:airpoll, family = binomial(link = &quot;logit&quot;), 
+##     data = lichens_dat)
+## 
+## Coefficients:
+##                 Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)       4.0313     7.1747   0.562    0.574
+## calcium           1.3807     2.1373   0.646    0.518
+## airpoll          -0.9422     1.1689  -0.806    0.420
+## calcium:airpoll  -0.1291     0.3389  -0.381    0.703
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 68.029  on 49  degrees of freedom
+## Residual deviance: 28.252  on 46  degrees of freedom
+## AIC: 36.252
+## 
+## Number of Fisher Scoring iterations: 7</code></pre>
+<p>Let’s create a simpler model.</p>
+<div class="panel panel-default tutorial-question-container">
+<div data-label="which_lichen_model" class="tutorial-question panel-body">
+<div id="which_lichen_model-answer_container" class="shiny-html-output"></div>
+<div id="which_lichen_model-message_container" class="shiny-html-output"></div>
+<div id="which_lichen_model-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+<p>On the basis of your answer above, create a simpler model called
+<code>lichen_glm2</code> and look at the summary:</p>
+<div class="tutorial-exercise" data-label="simpler_lichen_glm"
+data-completion="1" data-diagnostics="1" data-startover="1"
+data-lines="0">
+<script type="application/json" data-ui-opts="1">{"engine":"r","has_checker":false,"caption":"<span data-i18n=\"text.enginecap\" data-i18n-opts=\"{&quot;engine&quot;:&quot;R&quot;}\">R Code<\/span>"}</script>
+</div>
+<div class="tutorial-exercise-support"
+data-label="simpler_lichen_glm-solution" data-completion="1"
+data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>lichen_glm2 &lt;- glm(lichen ~ calcium + airpoll, family=binomial(link = &quot;logit&quot;), data=lichens_dat)
+summary(lichen_glm2)</code></pre>
+</div>
+<p>We can compare two GLM models using the <code>anova()</code>
+function, with the option that the <code>test="Chi"</code>. This does
+what is known as a likelihood-ratio test. If there is no significant
+difference in the models, you go for the one with the lower AIC.</p>
+<div class="tutorial-exercise" data-label="compare_lichens"
+data-completion="1" data-diagnostics="1" data-startover="1"
+data-lines="0">
+<script type="application/json" data-ui-opts="1">{"engine":"r","has_checker":false,"caption":"<span data-i18n=\"text.enginecap\" data-i18n-opts=\"{&quot;engine&quot;:&quot;R&quot;}\">R Code<\/span>"}</script>
+</div>
+<div class="tutorial-exercise-support"
+data-label="compare_lichens-solution" data-completion="1"
+data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>anova(lichen_glm1, lichen_glm2, test=&quot;Chi&quot;)</code></pre>
+</div>
+<p>You can see that there is no statistical difference in the p-value
+for the comparison of the two models. You should select the
+<strong>simpler model</strong>, which does not have the interaction
+term.</p>
+</div>
+<div id="section-predicted-values" class="section level3">
+<h3>Predicted values</h3>
+<p>The coefficient estimates shown in the
+<code>summary(lichen_glm2)</code> table are in
+<strong><em>logits</em></strong>. Recall the explanation of the
+<strong>link</strong> function that is used in GLMs:</p>
+<ul>
+<li>Gaussian (normal) distribution with continuous response = identity
+Link = no different from a conventional linear model.</li>
+<li>Poisson distribution with count data = log link = take natural
+logarithms when analysing by GLM, and exponents, <code>exp()</code>
+function, to get back to original units.</li>
+<li>Binomial distribution with presence/absence or proportion = take
+logits to analyse in the GLM, and ‘anti-logits’ to get back to original
+units.</li>
+</ul>
+<p>So what are these mysterious “logits”? Logits are the natural
+logarithm of odds, and odds are the ratio of successes to failures (or
+presences to absences etc.). Therefore manually calculating your
+predicted values is quite complicated, as you have to convert your
+estimates back from the original logits. Fortunately (phew!) R will do
+this for you automatically, and you can easily view your model
+predictions.</p>
+<p>We can use the <code>makeFun()</code> command to create a function
+from our GLM that can be used to create predictions in the correct units
+(a probability between 0 and 1.0) either for a given amount of
+<code>calcium</code> and <code>airpoll</code>:</p>
+<pre class="r"><code># Create a prediction function from our best GLM
+lichen_fit &lt;- makeFun(lichen_glm2)
+
+# What is the predicted probability of lichen being present at calcium of 2 and
+# air pollution of 5?
+lichen_fit(calcium=2, airpoll=5)</code></pre>
+<pre><code>##         1 
+## 0.7197867</code></pre>
+</div>
+<div id="section-adding-the-fitted-line" class="section level3">
+<h3>Adding the fitted line</h3>
+<p>If we want to create a plot with the curve for the predicted
+probability across a range of calcium values, we can create a new GLM
+that only includes calcium, and make predictions from that. However, for
+a simple visualisation, it’s often easier to use
+<code>gf_jitter()</code> with <code>gf_smooth()</code> as we did for the
+Poisson GLM:</p>
+<p><img src="NES2505_GLM_files/figure-html/lichen_fit_and_plot-1.png" width="624" /></p>
+<p>Modify the code below, to create a plot showing the predicted
+probability curve for air pollution <code>airpoll</code> instead of
+calcium.</p>
+<div class="tutorial-exercise" data-label="lichen_fit_and_plot2"
+data-completion="1" data-diagnostics="1" data-startover="1"
+data-lines="0">
+<pre class="text"><code>gf_jitter(lichen ~ calcium, data=lichens_dat, height=0.05) %&gt;% 
+  gf_smooth(method = &quot;glm&quot;, method.args=list(family=&quot;binomial&quot;), se=TRUE)</code></pre>
+<script type="application/json" data-ui-opts="1">{"engine":"r","has_checker":false,"caption":"<span data-i18n=\"text.enginecap\" data-i18n-opts=\"{&quot;engine&quot;:&quot;R&quot;}\">R Code<\/span>"}</script>
+</div>
+</div>
+</div>
+<div id="section-summary" class="section level2">
+<h2>Summary</h2>
+<p>Key things to remember about generalised linear models, GLMs,
+are:</p>
+<ul>
+<li>they are an extension of linear models, in that they as well as
+continuous response variables, they can handle other responses, such as
+count, proportion or binary data.</li>
+<li>the error component of a GLM is more flexible as a result, so you
+can specify whether Guassian, Poisson or Binomial errors are needed</li>
+<li>a slightly different method is used to estimate the model
+parameters, namely maximum likelihood rather than least-squares. Thus
+the format of the model output may appear slightly different.</li>
+<li>you can continue to use conventional diagnostic plots to check that
+the assumptions of your model are valid.</li>
+</ul>
+<p>There is an excellent, easy to read, introduction to GLMs at Andy
+Beckerman’s Book <a
+href="https://academic.oup.com/book/27290/chapter/196938074">Chapter 7 -
+Getting started with Generalized Linear Models</a>
+
+<script type="application/shiny-prerendered" data-context="server-start">
+library(learnr)
+library(mosaic)
+sppcount <- read.csv("Data/sppcount.csv")
+lichens_dat  <- read.csv("Data/lichen.csv")
+knitr::opts_chunk$set(echo = FALSE)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::register_http_handlers(session, metadata = NULL)
+</script>
+
+
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::prepare_tutorial_state(session)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::i18n_observe_tutorial_language(input, session)
+</script>
+
+
+<script type="application/shiny-prerendered" data-context="server">
+session$onSessionEnded(function() {
+        learnr:::event_trigger(session, "session_stop")
+      })
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+output$gauss_plot <- renderPlot({
+  gf_dhistogram(~ rnorm(n=100, mean=input$mean, sd=input$sd), bins = 20) %>% 
+    gf_dist("norm", params = list(mean=input$mean, sd=input$sd), colour = "blue") %>% 
+    gf_lims(x = c(0, 100), y = c(0, 0.15)) %>% 
+    gf_labs(x = "Value of random normal variable",
+            y = "Density (proportion of values)")
+})
+</script>
+
+
+<script type="application/shiny-prerendered" data-context="server">
+output$poiss_plot <- renderPlot({
+    gf_dist("pois", params = list(lambda=input$lambda)) %>% 
+    gf_lims(x = c(0, 100), y = c(0, 0.15)) %>% 
+    gf_labs(x = "Value of random Poisson (count) variable",
+            y = "Density (proportion of values)")
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+output$binom_plot <- renderPlot({
+    gf_histogram(~rbinom(n=25, size=input$size, prob=input$prob)) %>% 
+    gf_lims(x = c(-2, input$size+2), y = c(-1, 25)) %>% 
+    gf_labs(x = "Binomial count (e.g. number of seeds germinating per replicate)",
+            y = "Number of replicates in this category")
+})
+</script>
+
+
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-sppcount_lm-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-sppcount_lm-code-editor`)), session)
+output$`tutorial-exercise-sppcount_lm-output` <- renderUI({
+  `tutorial-exercise-sppcount_lm-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_cache(structure(list(label = "sppcount_lm", global_setup = structure(c("library(learnr)", 
+"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
+), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
+    chunks = list(list(label = "sppcount_lm", code = "", opts = list(
+        label = "\"sppcount_lm\"", exercise = "TRUE"), engine = "r")), 
+    code_check = NULL, error_check = NULL, check = NULL, solution = structure(c("# Create scatterplot", 
+    "gf_point(species ~ pollution, data=sppcount)", "", "# Create linear model, check coefficients and R-squared", 
+    "sppcount_lm <- lm(species~pollution, data=sppcount)", "summary(sppcount_lm)", 
+    "", "# Display first two diagnostic plots", "mplot(sppcount_lm, which=1:2)"
+    ), chunk_opts = list(label = "sppcount_lm-solution")), tests = NULL, 
+    options = list(eval = FALSE, echo = TRUE, results = "markup", 
+        tidy = FALSE, tidy.opts = NULL, collapse = FALSE, prompt = FALSE, 
+        comment = NA, highlight = FALSE, size = "normalsize", 
+        background = "#F7F7F7", strip.white = TRUE, cache = 0, 
+        cache.path = "NES2505_GLM_cache/html/", cache.vars = NULL, 
+        cache.lazy = TRUE, dependson = NULL, autodep = FALSE, 
+        cache.rebuild = FALSE, fig.keep = "high", fig.show = "asis", 
+        fig.align = "default", fig.path = "NES2505_GLM_files/figure-html/", 
+        dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
+        fig.width = 6.5, fig.height = 4, fig.env = "figure", 
+        fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
+        fig.pos = "", out.width = 624, out.height = NULL, out.extra = NULL, 
+        fig.retina = 2, external = TRUE, sanitize = FALSE, interval = 1, 
+        aniopts = "controls,loop", warning = TRUE, error = FALSE, 
+        message = TRUE, render = NULL, ref.label = NULL, child = NULL, 
+        engine = "r", split = FALSE, include = TRUE, purl = TRUE, 
+        max.print = 1000, label = "sppcount_lm", exercise = TRUE, 
+        code = "", out.width.px = 624, out.height.px = 384, params.src = "sppcount_lm, exercise=TRUE", 
+        fig.num = 0L, exercise.df_print = "paged", exercise.checker = "NULL"), 
+    engine = "r", version = "4"), class = c("r", "tutorial_exercise"
+)))
+</script>
+
+
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-sppcount_lm_predict-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-sppcount_lm_predict-code-editor`)), session)
+output$`tutorial-exercise-sppcount_lm_predict-output` <- renderUI({
+  `tutorial-exercise-sppcount_lm_predict-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_cache(structure(list(label = "sppcount_lm_predict", global_setup = structure(c("library(learnr)", 
+"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
+), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
+    chunks = list(list(label = "sppcount_lm_predict", code = "sppcount_lm <- lm(species ~ pollution, data = sppcount)\n\n", 
+        opts = list(label = "\"sppcount_lm_predict\"", exercise = "TRUE"), 
+        engine = "r")), code_check = NULL, error_check = NULL, 
+    check = NULL, solution = structure(c("gf_point(species ~ pollution, data = sppcount) %>% ", 
+    "  gf_lims(x = c(0, 15)) %>% ", "  gf_lm()"), chunk_opts = list(
+        label = "sppcount_lm_predict-solution")), tests = NULL, 
+    options = list(eval = FALSE, echo = TRUE, results = "markup", 
+        tidy = FALSE, tidy.opts = NULL, collapse = FALSE, prompt = FALSE, 
+        comment = NA, highlight = FALSE, size = "normalsize", 
+        background = "#F7F7F7", strip.white = TRUE, cache = 0, 
+        cache.path = "NES2505_GLM_cache/html/", cache.vars = NULL, 
+        cache.lazy = TRUE, dependson = NULL, autodep = FALSE, 
+        cache.rebuild = FALSE, fig.keep = "high", fig.show = "asis", 
+        fig.align = "default", fig.path = "NES2505_GLM_files/figure-html/", 
+        dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
+        fig.width = 6.5, fig.height = 4, fig.env = "figure", 
+        fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
+        fig.pos = "", out.width = 624, out.height = NULL, out.extra = NULL, 
+        fig.retina = 2, external = TRUE, sanitize = FALSE, interval = 1, 
+        aniopts = "controls,loop", warning = TRUE, error = FALSE, 
+        message = TRUE, render = NULL, ref.label = NULL, child = NULL, 
+        engine = "r", split = FALSE, include = TRUE, purl = TRUE, 
+        max.print = 1000, label = "sppcount_lm_predict", exercise = TRUE, 
+        code = c("sppcount_lm <- lm(species ~ pollution, data = sppcount)", 
+        "", ""), out.width.px = 624, out.height.px = 384, params.src = "sppcount_lm_predict, exercise=TRUE", 
+        fig.num = 0, exercise.df_print = "paged", exercise.checker = "NULL"), 
+    engine = "r", version = "4"), class = c("r", "tutorial_exercise"
+)))
+</script>
+
+
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-sppcount_glm-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-sppcount_glm-code-editor`)), session)
+output$`tutorial-exercise-sppcount_glm-output` <- renderUI({
+  `tutorial-exercise-sppcount_glm-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_cache(structure(list(label = "sppcount_glm", global_setup = structure(c("library(learnr)", 
+"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
+), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
+    chunks = list(list(label = "sppcount_glm", code = "", opts = list(
+        label = "\"sppcount_glm\"", exercise = "TRUE"), engine = "r")), 
+    code_check = NULL, error_check = NULL, check = NULL, solution = structure(c("# Create scatterplot", 
+    "gf_point(species ~ pollution, data=sppcount)", "", "# Create linear model, check coefficients and R-squared", 
+    "sppcount_glm <- glm(species~pollution, family = poisson(link = \"log\"), data=sppcount)", 
+    "summary(sppcount_glm)", "", "# Display first two diagnostic plots", 
+    "mplot(sppcount_glm, which=1:2)"), chunk_opts = list(label = "sppcount_glm-solution")), 
+    tests = NULL, options = list(eval = FALSE, echo = TRUE, results = "markup", 
+        tidy = FALSE, tidy.opts = NULL, collapse = FALSE, prompt = FALSE, 
+        comment = NA, highlight = FALSE, size = "normalsize", 
+        background = "#F7F7F7", strip.white = TRUE, cache = 0, 
+        cache.path = "NES2505_GLM_cache/html/", cache.vars = NULL, 
+        cache.lazy = TRUE, dependson = NULL, autodep = FALSE, 
+        cache.rebuild = FALSE, fig.keep = "high", fig.show = "asis", 
+        fig.align = "default", fig.path = "NES2505_GLM_files/figure-html/", 
+        dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
+        fig.width = 6.5, fig.height = 4, fig.env = "figure", 
+        fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
+        fig.pos = "", out.width = 624, out.height = NULL, out.extra = NULL, 
+        fig.retina = 2, external = TRUE, sanitize = FALSE, interval = 1, 
+        aniopts = "controls,loop", warning = TRUE, error = FALSE, 
+        message = TRUE, render = NULL, ref.label = NULL, child = NULL, 
+        engine = "r", split = FALSE, include = TRUE, purl = TRUE, 
+        max.print = 1000, label = "sppcount_glm", exercise = TRUE, 
+        code = "", out.width.px = 624, out.height.px = 384, params.src = "sppcount_glm, exercise=TRUE", 
+        fig.num = 0L, exercise.df_print = "paged", exercise.checker = "NULL"), 
+    engine = "r", version = "4"), class = c("r", "tutorial_exercise"
+)))
+</script>
+
+
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "lm_v_glm", question = structure("What happens if I run glm() without specifying the family?", html = TRUE, class = c("html", 
+"character")), answers = list(structure(list(id = "lnr_ans_a7e381f", 
+    option = "It uses a normal distribution estimated by least squares", 
+    value = "It uses a normal distribution estimated by least squares", 
+    label = structure("It uses a normal distribution estimated by least squares", html = TRUE, class = c("html", 
+    "character")), correct = FALSE, message = structure("No. It uses a normal (Gaussian) distribution, but\nestimates by maximum likelihood. The coefficients for the\nintercept and gradient will be the same, but AIC and deviance\nwill show.", html = TRUE, class = c("html", 
+    "character")), type = "literal"), class = c("tutorial_question_answer", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_6850786", 
+    option = "It uses a binomial distribution estimated by maximum likelihood", 
+    value = "It uses a binomial distribution estimated by maximum likelihood", 
+    label = structure("It uses a binomial distribution estimated by maximum likelihood", html = TRUE, class = c("html", 
+    "character")), correct = FALSE, message = structure("No. It defaults to a normal (Gaussian) distribution, but\nestimates by maximum likelihood.", html = TRUE, class = c("html", 
+    "character")), type = "literal"), class = c("tutorial_question_answer", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_386614a", 
+    option = "It uses a Poisson distribution estimated by maximum likelihood", 
+    value = "It uses a Poisson distribution estimated by maximum likelihood", 
+    label = structure("It uses a Poisson distribution estimated by maximum likelihood", html = TRUE, class = c("html", 
+    "character")), correct = FALSE, message = structure("No. It defaults to a normal (Gaussian) distribution, but\nestimates by maximum likelihood.", html = TRUE, class = c("html", 
+    "character")), type = "literal"), class = c("tutorial_question_answer", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_59f9c5e", 
+    option = "It uses a Gaussian distribution estimated by maximum likelihood", 
+    value = "It uses a Gaussian distribution estimated by maximum likelihood", 
+    label = structure("It uses a Gaussian distribution estimated by maximum likelihood", html = TRUE, class = c("html", 
+    "character")), correct = TRUE, message = structure("Good. It uses a normal (Gaussian) distribution, but\nestimates by maximum likelihood. Whilst the coefficients for the\nintercept and gradient will be the same as lm(), in glm() AIC and deviance\nwill show.", html = TRUE, class = c("html", 
+    "character")), type = "literal"), class = c("tutorial_question_answer", 
+"tutorial_quiz_answer"))), button_labels = list(submit = structure("<span data-i18n=\"button.questionsubmit\">Submit Answer<\u002fspan>", html = TRUE, class = c("html", 
+"character")), try_again = structure("<span data-i18n=\"button.questiontryagain\">Try Again<\u002fspan>", html = TRUE, class = c("html", 
+"character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html", 
+"character")), try_again = structure("Incorrect", html = TRUE, class = c("html", 
+"character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", 
+"character")), message = NULL, post_message = NULL), ids = list(
+    answer = "lm_v_glm-answer", question = "lm_v_glm"), loading = NULL, 
+    random_answer_order = TRUE, allow_retry = TRUE, seed = 1952573735.09076, 
+    options = list()), class = c("learnr_radio", "tutorial_question"
+)), session = session)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "recode", question = structure("Looking at the summary output above, what might be useful to do before\nvisualising and analysing the data?", html = TRUE, class = c("html", 
+"character")), answers = list(structure(list(id = "lnr_ans_2795114", 
+    option = "Since pH uses a log scale, it is essential to log-transform\n                the calcium content", 
+    value = "Since pH uses a log scale, it is essential to log-transform\n                the calcium content", 
+    label = structure("Since pH uses a log scale, it is essential to log-transform\nthe calcium content", html = TRUE, class = c("html", 
+    "character")), correct = FALSE, message = structure("No. Whilst pH does use log, it is\nbased on hydrogen-ion concentration not calcium", html = TRUE, class = c("html", 
+    "character")), type = "literal"), class = c("tutorial_question_answer", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_645ef5b", 
+    option = "Standardise the air pollution to zero mean and unit standard\n                deviation", 
+    value = "Standardise the air pollution to zero mean and unit standard\n                deviation", 
+    label = structure("Standardise the air pollution to zero mean and unit standard\ndeviation", html = TRUE, class = c("html", 
+    "character")), correct = FALSE, message = structure("No, this is not essential, although be\naware that this is sometimes useful if the explanatory variables\nare on very different scales", html = TRUE, class = c("html", 
+    "character")), type = "literal"), class = c("tutorial_question_answer", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_3ef1865", 
+    option = "Standardise the calcium to zero mean and unit standard\n                deviation", 
+    value = "Standardise the calcium to zero mean and unit standard\n                deviation", 
+    label = structure("Standardise the calcium to zero mean and unit standard\ndeviation", html = TRUE, class = c("html", 
+    "character")), correct = FALSE, message = structure("No, this is not essential, although be\naware that this is sometimes useful if the explanatory variables\nare on very different scales", html = TRUE, class = c("html", 
+    "character")), type = "literal"), class = c("tutorial_question_answer", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_977b9ac", 
+    option = "Convert the presence and absence of lichen to a factor", 
+    value = "Convert the presence and absence of lichen to a factor", 
+    label = structure("Convert the presence and absence of lichen to a factor", html = TRUE, class = c("html", 
+    "character")), correct = TRUE, message = structure("Good. This is not essential for the GLM\nanalysis, but is often required for good visualisation. You can\nuse the \\(\\text{as.factor()}\\) function to do this.", html = TRUE, class = c("html", 
+    "character")), type = "literal"), class = c("tutorial_question_answer", 
+"tutorial_quiz_answer"))), button_labels = list(submit = structure("<span data-i18n=\"button.questionsubmit\">Submit Answer<\u002fspan>", html = TRUE, class = c("html", 
+"character")), try_again = structure("<span data-i18n=\"button.questiontryagain\">Try Again<\u002fspan>", html = TRUE, class = c("html", 
+"character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html", 
+"character")), try_again = structure("Incorrect", html = TRUE, class = c("html", 
+"character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", 
+"character")), message = NULL, post_message = NULL), ids = list(
+    answer = "recode-answer", question = "recode"), loading = NULL, 
+    random_answer_order = FALSE, allow_retry = TRUE, seed = 341487900.340982, 
+    options = list()), class = c("learnr_radio", "tutorial_question"
+)), session = session)
+</script>
+
+
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-boxplot_calcium-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-boxplot_calcium-code-editor`)), session)
+output$`tutorial-exercise-boxplot_calcium-output` <- renderUI({
+  `tutorial-exercise-boxplot_calcium-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_cache(structure(list(label = "boxplot_calcium", global_setup = structure(c("library(learnr)", 
+"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
+), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
+    chunks = list(list(label = "boxplot_calcium", code = "# Create a factor for the lichen presence/absence\nlichens_dat$lichen_fct <- as.factor(lichens_dat$lichen)\nsummary(lichens_dat) # lichen_fct presence/absence now scores as 0/1 factor\n\ngf_boxplot(calcium ~ lichen_fct, data=lichens_dat) %>% \n  gf_refine(coord_flip()) # Flips horizontally. Note double-bracket", 
+        opts = list(label = "\"boxplot_calcium\"", exercise = "TRUE"), 
+        engine = "r")), code_check = NULL, error_check = NULL, 
+    check = NULL, solution = NULL, tests = NULL, options = list(
+        eval = FALSE, echo = TRUE, results = "markup", tidy = FALSE, 
+        tidy.opts = NULL, collapse = FALSE, prompt = FALSE, comment = NA, 
+        highlight = FALSE, size = "normalsize", background = "#F7F7F7", 
+        strip.white = TRUE, cache = 0, cache.path = "NES2505_GLM_cache/html/", 
+        cache.vars = NULL, cache.lazy = TRUE, dependson = NULL, 
+        autodep = FALSE, cache.rebuild = FALSE, fig.keep = "high", 
+        fig.show = "asis", fig.align = "default", fig.path = "NES2505_GLM_files/figure-html/", 
+        dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
+        fig.width = 6.5, fig.height = 4, fig.env = "figure", 
+        fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
+        fig.pos = "", out.width = 624, out.height = NULL, out.extra = NULL, 
+        fig.retina = 2, external = TRUE, sanitize = FALSE, interval = 1, 
+        aniopts = "controls,loop", warning = TRUE, error = FALSE, 
+        message = TRUE, render = NULL, ref.label = NULL, child = NULL, 
+        engine = "r", split = FALSE, include = TRUE, purl = TRUE, 
+        max.print = 1000, label = "boxplot_calcium", exercise = TRUE, 
+        code = c("# Create a factor for the lichen presence/absence", 
+        "lichens_dat$lichen_fct <- as.factor(lichens_dat$lichen)", 
+        "summary(lichens_dat) # lichen_fct presence/absence now scores as 0/1 factor", 
+        "", "gf_boxplot(calcium ~ lichen_fct, data=lichens_dat) %>% ", 
+        "  gf_refine(coord_flip()) # Flips horizontally. Note double-bracket"
+        ), out.width.px = 624, out.height.px = 384, params.src = "boxplot_calcium, exercise=TRUE", 
+        fig.num = 0, exercise.df_print = "paged", exercise.checker = "NULL"), 
+    engine = "r", version = "4"), class = c("r", "tutorial_exercise"
+)))
+</script>
+
+
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-boxplot_airpoll-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-boxplot_airpoll-code-editor`)), session)
+output$`tutorial-exercise-boxplot_airpoll-output` <- renderUI({
+  `tutorial-exercise-boxplot_airpoll-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_cache(structure(list(label = "boxplot_airpoll", global_setup = structure(c("library(learnr)", 
+"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
+), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
+    chunks = list(list(label = "boxplot_airpoll", code = "", 
+        opts = list(label = "\"boxplot_airpoll\"", exercise = "TRUE"), 
+        engine = "r")), code_check = NULL, error_check = NULL, 
+    check = NULL, solution = structure(c("lichens_dat$lichen_fct <- as.factor(lichens_dat$lichen)", 
+    "", "gf_boxplot(airpoll ~ lichen_fct, data=lichens_dat) %>% ", 
+    "  gf_labs(x = \"Presence or absence of lichen\", y = \"Air pollution\") %>% ", 
+    "  gf_refine(coord_flip())"), chunk_opts = list(label = "boxplot_airpoll-solution")), 
+    tests = NULL, options = list(eval = FALSE, echo = TRUE, results = "markup", 
+        tidy = FALSE, tidy.opts = NULL, collapse = FALSE, prompt = FALSE, 
+        comment = NA, highlight = FALSE, size = "normalsize", 
+        background = "#F7F7F7", strip.white = TRUE, cache = 0, 
+        cache.path = "NES2505_GLM_cache/html/", cache.vars = NULL, 
+        cache.lazy = TRUE, dependson = NULL, autodep = FALSE, 
+        cache.rebuild = FALSE, fig.keep = "high", fig.show = "asis", 
+        fig.align = "default", fig.path = "NES2505_GLM_files/figure-html/", 
+        dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
+        fig.width = 6.5, fig.height = 4, fig.env = "figure", 
+        fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
+        fig.pos = "", out.width = 624, out.height = NULL, out.extra = NULL, 
+        fig.retina = 2, external = TRUE, sanitize = FALSE, interval = 1, 
+        aniopts = "controls,loop", warning = TRUE, error = FALSE, 
+        message = TRUE, render = NULL, ref.label = NULL, child = NULL, 
+        engine = "r", split = FALSE, include = TRUE, purl = TRUE, 
+        max.print = 1000, label = "boxplot_airpoll", exercise = TRUE, 
+        code = "", out.width.px = 624, out.height.px = 384, params.src = "boxplot_airpoll, exercise=TRUE", 
+        fig.num = 0L, exercise.df_print = "paged", exercise.checker = "NULL"), 
+    engine = "r", version = "4"), class = c("r", "tutorial_exercise"
+)))
+</script>
+
+
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "which_lichen_model", 
+    question = structure("Which term(s) should be removed for the simpler model?", html = TRUE, class = c("html", 
+    "character")), answers = list(structure(list(id = "lnr_ans_31e222", 
+        option = "All terms are non-significant terms, therefore we cannot make\n                a simpler model", 
+        value = "All terms are non-significant terms, therefore we cannot make\n                a simpler model", 
+        label = structure("All terms are non-significant terms, therefore we cannot make\na simpler model", html = TRUE, class = c("html", 
+        "character")), correct = FALSE, message = structure("No. Always look at the interaction\nterm first", html = TRUE, class = c("html", 
+        "character")), type = "literal"), class = c("tutorial_question_answer", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_b1246e4", 
+        option = "Only keep airpoll as it appears to be most important", 
+        value = "Only keep airpoll as it appears to be most important", 
+        label = structure("Only keep airpoll as it appears to be most important", html = TRUE, class = c("html", 
+        "character")), correct = FALSE, message = structure("No.\nSince the interaction term is non-significant it should be\nremoved first", html = TRUE, class = c("html", 
+        "character")), type = "literal"), class = c("tutorial_question_answer", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_4838a1d", 
+        option = "The interaction term should be removed first and the new model\n                tested", 
+        value = "The interaction term should be removed first and the new model\n                tested", 
+        label = structure("The interaction term should be removed first and the new model\ntested", html = TRUE, class = c("html", 
+        "character")), correct = TRUE, message = structure("Good. Always look at the interaction\nbefore the main effects", html = TRUE, class = c("html", 
+        "character")), type = "literal"), class = c("tutorial_question_answer", 
+    "tutorial_quiz_answer"))), button_labels = list(submit = structure("<span data-i18n=\"button.questionsubmit\">Submit Answer<\u002fspan>", html = TRUE, class = c("html", 
+    "character")), try_again = structure("<span data-i18n=\"button.questiontryagain\">Try Again<\u002fspan>", html = TRUE, class = c("html", 
+    "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html", 
+    "character")), try_again = structure("Incorrect", html = TRUE, class = c("html", 
+    "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", 
+    "character")), message = NULL, post_message = NULL), ids = list(
+        answer = "which_lichen_model-answer", question = "which_lichen_model"), 
+    loading = NULL, random_answer_order = TRUE, allow_retry = TRUE, 
+    seed = 861340204.098907, options = list()), class = c("learnr_radio", 
+"tutorial_question")), session = session)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-simpler_lichen_glm-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-simpler_lichen_glm-code-editor`)), session)
+output$`tutorial-exercise-simpler_lichen_glm-output` <- renderUI({
+  `tutorial-exercise-simpler_lichen_glm-result`()
+})
+</script>
+
+
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_cache(structure(list(label = "simpler_lichen_glm", global_setup = structure(c("library(learnr)", 
+"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
+), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
+    chunks = list(list(label = "simpler_lichen_glm", code = "", 
+        opts = list(label = "\"simpler_lichen_glm\"", exercise = "TRUE"), 
+        engine = "r")), code_check = NULL, error_check = NULL, 
+    check = NULL, solution = structure(c("lichen_glm2 <- glm(lichen ~ calcium + airpoll, family=binomial(link = \"logit\"), data=lichens_dat)", 
+    "summary(lichen_glm2)"), chunk_opts = list(label = "simpler_lichen_glm-solution")), 
+    tests = NULL, options = list(eval = FALSE, echo = TRUE, results = "markup", 
+        tidy = FALSE, tidy.opts = NULL, collapse = FALSE, prompt = FALSE, 
+        comment = NA, highlight = FALSE, size = "normalsize", 
+        background = "#F7F7F7", strip.white = TRUE, cache = 0, 
+        cache.path = "NES2505_GLM_cache/html/", cache.vars = NULL, 
+        cache.lazy = TRUE, dependson = NULL, autodep = FALSE, 
+        cache.rebuild = FALSE, fig.keep = "high", fig.show = "asis", 
+        fig.align = "default", fig.path = "NES2505_GLM_files/figure-html/", 
+        dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
+        fig.width = 6.5, fig.height = 4, fig.env = "figure", 
+        fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
+        fig.pos = "", out.width = 624, out.height = NULL, out.extra = NULL, 
+        fig.retina = 2, external = TRUE, sanitize = FALSE, interval = 1, 
+        aniopts = "controls,loop", warning = TRUE, error = FALSE, 
+        message = TRUE, render = NULL, ref.label = NULL, child = NULL, 
+        engine = "r", split = FALSE, include = TRUE, purl = TRUE, 
+        max.print = 1000, label = "simpler_lichen_glm", exercise = TRUE, 
+        code = "", out.width.px = 624, out.height.px = 384, params.src = "simpler_lichen_glm, exercise=TRUE", 
+        fig.num = 0L, exercise.df_print = "paged", exercise.checker = "NULL"), 
+    engine = "r", version = "4"), class = c("r", "tutorial_exercise"
+)))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-compare_lichens-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-compare_lichens-code-editor`)), session)
+output$`tutorial-exercise-compare_lichens-output` <- renderUI({
+  `tutorial-exercise-compare_lichens-result`()
+})
+</script>
+
+
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_cache(structure(list(label = "compare_lichens", global_setup = structure(c("library(learnr)", 
+"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
+), chunk_opts = list(label = "setup", include = FALSE)), setup = "lichen_glm1 <- glm(lichen ~ calcium * airpoll, family=binomial, data=lichens_dat)\nlichen_glm2 <- glm(lichen ~ calcium + airpoll, family=binomial, data=lichens_dat)", 
+    chunks = list(list(label = "compare_lichens-setup", code = "lichen_glm1 <- glm(lichen ~ calcium * airpoll, family=binomial, data=lichens_dat)\nlichen_glm2 <- glm(lichen ~ calcium + airpoll, family=binomial, data=lichens_dat)", 
+        opts = list(label = "\"compare_lichens-setup\""), engine = "r"), 
+        list(label = "compare_lichens", code = "", opts = list(
+            label = "\"compare_lichens\"", exercise = "TRUE"), 
+            engine = "r")), code_check = NULL, error_check = NULL, 
+    check = NULL, solution = structure("anova(lichen_glm1, lichen_glm2, test=\"Chi\")", chunk_opts = list(
+        label = "compare_lichens-solution")), tests = NULL, options = list(
+        eval = FALSE, echo = TRUE, results = "markup", tidy = FALSE, 
+        tidy.opts = NULL, collapse = FALSE, prompt = FALSE, comment = NA, 
+        highlight = FALSE, size = "normalsize", background = "#F7F7F7", 
+        strip.white = TRUE, cache = 0, cache.path = "NES2505_GLM_cache/html/", 
+        cache.vars = NULL, cache.lazy = TRUE, dependson = NULL, 
+        autodep = FALSE, cache.rebuild = FALSE, fig.keep = "high", 
+        fig.show = "asis", fig.align = "default", fig.path = "NES2505_GLM_files/figure-html/", 
+        dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
+        fig.width = 6.5, fig.height = 4, fig.env = "figure", 
+        fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
+        fig.pos = "", out.width = 624, out.height = NULL, out.extra = NULL, 
+        fig.retina = 2, external = TRUE, sanitize = FALSE, interval = 1, 
+        aniopts = "controls,loop", warning = TRUE, error = FALSE, 
+        message = TRUE, render = NULL, ref.label = NULL, child = NULL, 
+        engine = "r", split = FALSE, include = TRUE, purl = TRUE, 
+        max.print = 1000, label = "compare_lichens", exercise = TRUE, 
+        code = "", out.width.px = 624, out.height.px = 384, params.src = "compare_lichens, exercise=TRUE", 
+        fig.num = 0L, exercise.df_print = "paged", exercise.checker = "NULL"), 
+    engine = "r", version = "4"), class = c("r", "tutorial_exercise"
+)))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-lichen_fit_and_plot2-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-lichen_fit_and_plot2-code-editor`)), session)
+output$`tutorial-exercise-lichen_fit_and_plot2-output` <- renderUI({
+  `tutorial-exercise-lichen_fit_and_plot2-result`()
+})
+</script>
+
+
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_cache(structure(list(label = "lichen_fit_and_plot2", global_setup = structure(c("library(learnr)", 
+"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
+), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
+    chunks = list(list(label = "lichen_fit_and_plot2", code = "gf_jitter(lichen ~ calcium, data=lichens_dat, height=0.05) %>% \n  gf_smooth(method = \"glm\", method.args=list(family=\"binomial\"), se=TRUE)", 
+        opts = list(label = "\"lichen_fit_and_plot2\"", exercise = "TRUE"), 
+        engine = "r")), code_check = NULL, error_check = NULL, 
+    check = NULL, solution = NULL, tests = NULL, options = list(
+        eval = FALSE, echo = TRUE, results = "markup", tidy = FALSE, 
+        tidy.opts = NULL, collapse = FALSE, prompt = FALSE, comment = NA, 
+        highlight = FALSE, size = "normalsize", background = "#F7F7F7", 
+        strip.white = TRUE, cache = 0, cache.path = "NES2505_GLM_cache/html/", 
+        cache.vars = NULL, cache.lazy = TRUE, dependson = NULL, 
+        autodep = FALSE, cache.rebuild = FALSE, fig.keep = "high", 
+        fig.show = "asis", fig.align = "default", fig.path = "NES2505_GLM_files/figure-html/", 
+        dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
+        fig.width = 6.5, fig.height = 4, fig.env = "figure", 
+        fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
+        fig.pos = "", out.width = 624, out.height = NULL, out.extra = NULL, 
+        fig.retina = 2, external = TRUE, sanitize = FALSE, interval = 1, 
+        aniopts = "controls,loop", warning = TRUE, error = FALSE, 
+        message = TRUE, render = NULL, ref.label = NULL, child = NULL, 
+        engine = "r", split = FALSE, include = TRUE, purl = TRUE, 
+        max.print = 1000, label = "lichen_fit_and_plot2", exercise = TRUE, 
+        code = c("gf_jitter(lichen ~ calcium, data=lichens_dat, height=0.05) %>% ", 
+        "  gf_smooth(method = \"glm\", method.args=list(family=\"binomial\"), se=TRUE)"
+        ), out.width.px = 624, out.height.px = 384, params.src = "lichen_fit_and_plot2, exercise=TRUE", 
+        fig.num = 0, exercise.df_print = "paged", exercise.checker = "NULL"), 
+    engine = "r", version = "4"), class = c("r", "tutorial_exercise"
+)))
+</script>
+</p>
+<!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="dependencies">
+{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["header-attrs"]},{"type":"character","attributes":{},"value":["2.22"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/pandoc"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["header-attrs.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.22"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["3.6.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/3.6.0"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery-3.6.0.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquerylib"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.1.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/bootstrap"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/cerulean.min.css"]},{"type":"character","attributes":{},"value":["<style>h1 {font-size: 34px;}\n       h1.title {font-size: 38px;}\n       h2 {font-size: 30px;}\n       h3 {font-size: 24px;}\n       h4 {font-size: 18px;}\n       h5 {font-size: 16px;}\n       h6 {font-size: 12px;}\n       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}\n       pre:not([class]) { background-color: white }<\/style>"]},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.22"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["pagedtable"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/pagedtable-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/pagedtable.js"]},{"type":"character","attributes":{},"value":["css/pagedtable.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.22"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["textmate.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.22"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.11.4"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["i18n"]},{"type":"character","attributes":{},"value":["21.6.10"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/i18n"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["i18next.min.js","tutorial-i18n-init.js"]},{"type":"NULL"},{"type":"character","attributes":{},"value":["<script id=\"i18n-cstm-trns\" type=\"application/json\">{\"language\":\"en\",\"resources\":{\"en\":{\"translation\":{\"button\":{\"runcode\":\"Run Code\",\"runcodetitle\":\"$t(button.runcode) ({{kbd}})\",\"hint\":\"Hint\",\"hint_plural\":\"Hints\",\"hinttitle\":\"$t(button.hint)\",\"hintnext\":\"Next Hint\",\"hintprev\":\"Previous Hint\",\"solution\":\"Solution\",\"solutiontitle\":\"$t(button.solution)\",\"copyclipboard\":\"Copy to Clipboard\",\"startover\":\"Start Over\",\"startovertitle\":\"$t(button.startover)\",\"continue\":\"Continue\",\"submitanswer\":\"Submit Answer\",\"submitanswertitle\":\"$t(button.submitanswer)\",\"previoustopic\":\"Previous Topic\",\"nexttopic\":\"Next Topic\",\"questionsubmit\":\"$t(button.submitanswer)\",\"questiontryagain\":\"Try Again\"},\"text\":{\"startover\":\"Start Over\",\"areyousure\":\"Are you sure you want to start over? (all exercise progress will be reset)\",\"youmustcomplete\":\"You must complete the\",\"exercise\":\"exercise\",\"exercise_plural\":\"exercises\",\"inthissection\":\"in this section before continuing.\",\"code\":\"Code\",\"enginecap\":\"{{engine}} $t(text.code)\",\"quiz\":\"Quiz\",\"blank\":\"blank\",\"blank_plural\":\"blanks\",\"exercisecontainsblank\":\"This exercise contains {{count}} $t(text.blank).\",\"pleasereplaceblank\":\"Please replace {{blank}} with valid code.\",\"unparsable\":\"It looks like this might not be valid R code. R cannot determine how to turn your text into a complete command. You may have forgotten to fill in a blank, to remove an underscore, to include a comma between arguments, or to close an opening <code>&quot;<\\/code>, <code>'<\\/code>, <code>(<\\/code> or <code>{<\\/code> with a matching <code>&quot;<\\/code>, <code>'<\\/code>, <code>)<\\/code> or <code>}<\\/code>.\\n\",\"unparsablequotes\":\"<p>It looks like your R code contains specially formatted quotation marks or &quot;curly&quot; quotes (<code>{{character}}<\\/code>) around character strings, making your code invalid. R requires character values to be contained in straight quotation marks (<code>&quot;<\\/code> or <code>'<\\/code>).<\\/p> {{code}} <p>Don't worry, this is a common source of errors when you copy code from another app that applies its own formatting to text. You can try replacing the code on that line with the following. There may be other places that need to be fixed, too.<\\/p> {{suggestion}}\\n\",\"unparsableunicode\":\"<p>It looks like your R code contains an unexpected special character (<code>{{character}}<\\/code>) that makes your code invalid.<\\/p> {{code}} <p>Sometimes your code may contain a special character that looks like a regular character, especially if you copy and paste the code from another app. Try deleting the special character from your code and retyping it manually.<\\/p>\\n\",\"unparsableunicodesuggestion\":\"<p>It looks like your R code contains an unexpected special character (<code>{{character}}<\\/code>) that makes your code invalid.<\\/p> {{code}} <p>Sometimes your code may contain a special character that looks like a regular character, especially if you copy and paste the code from another app. You can try replacing the code on that line with the following. There may be other places that need to be fixed, too.<\\/p> {{suggestion}}\\n\",\"and\":\"and\",\"or\":\"or\",\"listcomma\":\", \",\"oxfordcomma\":\",\"}}},\"fr\":{\"translation\":{\"button\":{\"runcode\":\"Lancer le Code\",\"runcodetitle\":\"$t(button.runcode) ({{kbd}})\",\"hint\":\"Indication\",\"hint_plural\":\"Indications\",\"hinttitle\":\"$t(button.hint)\",\"hintnext\":\"Indication Suivante\",\"hintprev\":\"Indication Précédente\",\"solution\":\"Solution\",\"solutiontitle\":\"$t(button.solution)\",\"copyclipboard\":\"Copier dans le Presse-papier\",\"startover\":\"Recommencer\",\"startovertitle\":\"$t(button.startover)\",\"continue\":\"Continuer\",\"submitanswer\":\"Soumettre\",\"submitanswertitle\":\"$t(button.submitanswer)\",\"previoustopic\":\"Chapitre Précédent\",\"nexttopic\":\"Chapitre Suivant\",\"questionsubmit\":\"$t(button.submitanswer)\",\"questiontryagain\":\"Réessayer\"},\"text\":{\"startover\":\"Recommencer\",\"areyousure\":\"Êtes-vous certains de vouloir recommencer? (La progression sera remise à zéro)\",\"youmustcomplete\":\"Vous devez d'abord compléter\",\"exercise\":\"l'exercice\",\"exercise_plural\":\"des exercices\",\"inthissection\":\"de cette section avec de continuer.\",\"code\":\"Code\",\"enginecap\":\"$t(text.code) {{engine}}\",\"quiz\":\"Quiz\",\"and\":\"et\",\"or\":\"ou\",\"oxfordcomma\":\"\"}}},\"es\":{\"translation\":{\"button\":{\"runcode\":\"Ejecutar código\",\"runcodetitle\":\"$t(button.runcode) ({{kbd}})\",\"hint\":\"Pista\",\"hint_plural\":\"Pistas\",\"hinttitle\":\"$t(button.hint)\",\"hintnext\":\"Siguiente pista\",\"hintprev\":\"Pista anterior\",\"solution\":\"Solución\",\"solutiontitle\":\"$t(button.solution)\",\"copyclipboard\":\"Copiar al portapapeles\",\"startover\":\"Reiniciar\",\"startovertitle\":\"$t(button.startover)\",\"continue\":\"Continuar\",\"submitanswer\":\"Enviar respuesta\",\"submitanswertitle\":\"$t(button.submitanswer)\",\"previoustopic\":\"Tema anterior\",\"nexttopic\":\"Tema siguiente\",\"questionsubmit\":\"$t(button.submitanswer)\",\"questiontryagain\":\"Volver a intentar\"},\"text\":{\"startover\":\"Reiniciar\",\"areyousure\":\"¿De verdad quieres empezar de nuevo? (todo el progreso del ejercicio se perderá)\",\"youmustcomplete\":\"Debes completar\",\"exercise\":\"el ejercicio\",\"exercise_plural\":\"los ejercicios\",\"inthissection\":\"en esta sección antes de continuar.\",\"code\":\"Código\",\"enginecap\":\"$t(text.code) {{engine}}\",\"quiz\":\"Cuestionario\",\"and\":\"y\",\"or\":\"o\",\"oxfordcomma\":\"\"}}},\"pt\":{\"translation\":{\"button\":{\"runcode\":\"Executar código\",\"runcodetitle\":\"$t(button.runcode) ({{kbd}})\",\"hint\":\"Dica\",\"hint_plural\":\"Dicas\",\"hinttitle\":\"$t(button.hint)\",\"hintnext\":\"Próxima dica\",\"hintprev\":\"Dica anterior\",\"solution\":\"Solução\",\"solutiontitle\":\"$t(button.solution)\",\"copyclipboard\":\"Copiar para a área de transferência\",\"startover\":\"Reiniciar\",\"startovertitle\":\"$t(button.startover)\",\"continue\":\"Continuar\",\"submitanswer\":\"Enviar resposta\",\"submitanswertitle\":\"$t(button.submitanswer)\",\"previoustopic\":\"Tópico anterior\",\"nexttopic\":\"Próximo tópico\",\"questionsubmit\":\"$t(button.submitanswer)\",\"questiontryagain\":\"Tentar novamente\"},\"text\":{\"startover\":\"Reiniciar\",\"areyousure\":\"Tem certeza que deseja começar novamente? (todo o progresso feito será perdido)\",\"youmustcomplete\":\"Você deve completar\",\"exercise\":\"o exercício\",\"exercise_plural\":\"os exercícios\",\"inthissection\":\"nesta seção antes de continuar.\",\"code\":\"Código\",\"enginecap\":\"$t(text.code) {{engine}}\",\"quiz\":\"Quiz\",\"and\":\"e\",\"or\":\"ou\",\"oxfordcomma\":\"\"}}},\"tr\":{\"translation\":{\"button\":{\"runcode\":\"Çalıştırma Kodu\",\"runcodetitle\":\"$t(button.runcode) ({{kbd}})\",\"hint\":\"Ipucu\",\"hint_plural\":\"İpuçları\",\"hinttitle\":\"$t(button.hint)\",\"hintnext\":\"Sonraki İpucu\",\"hintprev\":\"Önceki İpucu\",\"solution\":\"Çözüm\",\"solutiontitle\":\"$t(button.solution)\",\"copyclipboard\":\"Pano'ya Kopyala\",\"startover\":\"Baştan Başlamak\",\"startovertitle\":\"$t(button.startover)\",\"continue\":\"Devam et\",\"submitanswer\":\"Cevabı onayla\",\"submitanswertitle\":\"$t(button.submitanswer)\",\"previoustopic\":\"Önceki Konu\",\"nexttopic\":\"Sonraki Konu\",\"questionsubmit\":\"$t(button.submitanswer)\",\"questiontryagain\":\"Tekrar Deneyin\"},\"text\":{\"startover\":\"Baştan Başlamak\",\"areyousure\":\"Baştan başlamak istediğinizden emin misiniz? (tüm egzersiz ilerlemesi kaybolacak)\",\"youmustcomplete\":\"Tamamlamalısın\",\"exercise\":\"egzersiz\",\"exercise_plural\":\"egzersizler\",\"inthissection\":\"devam etmeden önce bu bölümde\",\"code\":\"Kod\",\"enginecap\":\"$t(text.code) {{engine}}\",\"quiz\":\"Sınav\",\"oxfordcomma\":\"\"}}},\"emo\":{\"translation\":{\"button\":{\"runcode\":\"🏃\",\"runcodetitle\":\"$t(button.runcode) ({{kbd}})\",\"hint\":\"💡\",\"hint_plural\":\"$t(button.hint)\",\"hinttitle\":\"$t(button.hint)\",\"solution\":\"🎯\",\"solutiontitle\":\"$t(button.solution)\",\"copyclipboard\":\"📋\",\"startover\":\"⏮\",\"startovertitle\":\"Start Over\",\"continue\":\"✅\",\"submitanswer\":\"🆗\",\"submitanswertitle\":\"Submit Answer\",\"previoustopic\":\"⬅\",\"nexttopic\":\"➡\",\"questionsubmit\":\"$t(button.submitanswer)\",\"questiontryagain\":\"🔁\"},\"text\":{\"startover\":\"⏮\",\"areyousure\":\"🤔\",\"youmustcomplete\":\"⚠️ 👉 🧑‍💻\",\"exercise\":\"\",\"exercise_plural\":\"\",\"inthissection\":\"\",\"code\":\"💻\",\"enginecap\":\"$t(text.code) {{engine}}\",\"oxfordcomma\":\"\"}}},\"eu\":{\"translation\":{\"button\":{\"runcode\":\"Kodea egikaritu\",\"runcodetitle\":\"$t(button.runcode) ({{kbd}})\",\"hint\":\"Laguntza\",\"hint_plural\":\"Laguntza\",\"hinttitle\":\"$t(button.hint)\",\"hintnext\":\"Aurreko laguntza\",\"hintprev\":\"Hurrengo laguntza\",\"solution\":\"Ebazpena\",\"solutiontitle\":\"$t(button.solution)\",\"copyclipboard\":\"Arbelean kopiatu\",\"startover\":\"Berrabiarazi\",\"startovertitle\":\"$t(button.startover)\",\"continue\":\"Jarraitu\",\"submitanswer\":\"Erantzuna bidali\",\"submitanswertitle\":\"$t(button.submitanswer)\",\"previoustopic\":\"Aurreko atala\",\"nexttopic\":\"Hurrengo atala\",\"questionsubmit\":\"$t(button.submitanswer)\",\"questiontryagain\":\"Berriro saiatu\"},\"text\":{\"startover\":\"Berrabiarazi\",\"areyousure\":\"Berriro hasi nahi duzu? (egindako lana galdu egingo da)\",\"youmustcomplete\":\"Aurrera egin baino lehen atal honetako\",\"exercise\":\"ariketa egin behar duzu.\",\"exercise_plural\":\"ariketak egin behar dituzu.\",\"inthissection\":\"\",\"code\":\"Kodea\",\"enginecap\":\"$t(text.code) {{engine}}\",\"quiz\":\"Galdetegia\",\"oxfordcomma\":\"\"}}},\"de\":{\"translation\":{\"button\":{\"runcode\":\"Code ausführen\",\"runcodetitle\":\"$t(button.runcode) ({{kbd}})\",\"hint\":\"Tipp\",\"hint_plural\":\"Tipps\",\"hinttitle\":\"$t(button.hint)\",\"hintnext\":\"Nächster Tipp\",\"hintprev\":\"Vorheriger Tipp\",\"solution\":\"Lösung\",\"solutiontitle\":\"$t(button.solution)\",\"copyclipboard\":\"In die Zwischenablage kopieren\",\"startover\":\"Neustart\",\"startovertitle\":\"$t(button.startover)\",\"continue\":\"Weiter\",\"submitanswer\":\"Antwort einreichen\",\"submitanswertitle\":\"$t(button.submitanswer)\",\"previoustopic\":\"Vorheriges Kapitel\",\"nexttopic\":\"Nächstes Kapitel\",\"questionsubmit\":\"$t(button.submitanswer)\",\"questiontryagain\":\"Nochmal versuchen\"},\"text\":{\"startover\":\"Neustart\",\"areyousure\":\"Bist du sicher, dass du neustarten willst? (der gesamte Lernfortschritt wird gelöscht)\",\"youmustcomplete\":\"Vervollstädinge\",\"exercise\":\"die Übung\",\"exercise_plural\":\"die Übungen\",\"inthissection\":\"in diesem Kapitel, bevor du fortfährst.\",\"code\":\"Code\",\"enginecap\":\"$t(text.code) {{engine}}\",\"quiz\":\"Quiz\",\"blank\":\"Lücke\",\"blank_plural\":\"Lücken\",\"pleasereplaceblank\":\"Bitte ersetze {{blank}} mit gültigem Code.\",\"unparsable\":\"Dies scheint kein gültiger R Code zu sein. R kann deinen Text nicht in einen gültigen Befehl übersetzen. Du hast vielleicht vergessen, die Lücke zu füllen, einen Unterstrich zu entfernen, ein Komma zwischen Argumente zu setzen oder ein eröffnendes <code>&quot;<\\/code>, <code>'<\\/code>, <code>(<\\/code> oder <code>{<\\/code> mit einem zugehörigen <code>&quot;<\\/code>, <code>'<\\/code>, <code>)<\\/code> oder <code>}<\\/code> zu schließen.\\n\",\"and\":\"und\",\"or\":\"oder\",\"listcomma\":\", \",\"oxfordcomma\":\",\"}}},\"ko\":{\"translation\":{\"button\":{\"runcode\":\"코드 실행\",\"runcodetitle\":\"$t(button.runcode) ({{kbd}})\",\"hint\":\"힌트\",\"hint_plural\":\"힌트들\",\"hinttitle\":\"$t(button.hint)\",\"hintnext\":\"다음 힌트\",\"hintprev\":\"이전 힌트\",\"solution\":\"솔루션\",\"solutiontitle\":\"$t(button.solution)\",\"copyclipboard\":\"클립보드에 복사\",\"startover\":\"재학습\",\"startovertitle\":\"$t(button.startover)\",\"continue\":\"다음 학습으로\",\"submitanswer\":\"정답 제출\",\"submitanswertitle\":\"$t(button.submitanswer)\",\"previoustopic\":\"이전 토픽\",\"nexttopic\":\"다음 토픽\",\"questionsubmit\":\"$t(button.submitanswer)\",\"questiontryagain\":\"재시도\"},\"text\":{\"startover\":\"재학습\",\"areyousure\":\"다시 시작 하시겠습니까? (모든 예제의 진행 정보가 재설정됩니다)\",\"youmustcomplete\":\"당신은 완료해야 합니다\",\"exercise\":\"연습문제\",\"exercise_plural\":\"연습문제들\",\"inthissection\":\"이 섹션을 실행하기 전에\",\"code\":\"코드\",\"enginecap\":\"$t(text.code) {{engine}}\",\"quiz\":\"퀴즈\",\"blank\":\"공백\",\"blank_plural\":\"공백들\",\"exercisecontainsblank\":\"이 연습문제에는 {{count}}개의 $t(text.blank)이 포함되어 있습니다.\",\"pleasereplaceblank\":\"{{blank}}를 유효한 코드로 바꾸십시오.\",\"unparsable\":\"이것은 유효한 R 코드가 아닐 수 있습니다. R은 텍스트를 완전한 명령으로 변환하는 방법을 결정할 수 없습니다. 당신은 공백이나 밑줄을 대체하여 채우기, 인수를 컴마로 구분하기, 또는 <code>&quot;<\\/code>, <code>'<\\/code>, <code>(<\\/code> , <code>{<\\/code>로 시작하는 구문을 닫는 <code>&quot;<\\/code>, <code>'<\\/code>, <code>)<\\/code>, <code>}<\\/code>을 잊었을 수도 있습니다.\\n\",\"and\":\"그리고\",\"or\":\"혹은\",\"listcomma\":\", \",\"oxfordcomma\":\"\"}}},\"zh\":{\"translation\":{\"button\":{\"runcode\":\"运行代码\",\"runcodetitle\":\"$t(button.runcode) ({{kbd}})\",\"hint\":\"提示\",\"hint_plural\":\"提示\",\"hinttitle\":\"$t(button.hint)\",\"hintnext\":\"下一个提示\",\"hintprev\":\"上一个提示\",\"solution\":\"答案\",\"solutiontitle\":\"$t(button.solution)\",\"copyclipboard\":\"复制到剪切板\",\"startover\":\"重新开始\",\"startovertitle\":\"$t(button.startover)\",\"continue\":\"继续\",\"submitanswer\":\"提交答案\",\"submitanswertitle\":\"$t(button.submitanswer)\",\"previoustopic\":\"上一专题\",\"nexttopic\":\"下一专题\",\"questionsubmit\":\"$t(button.submitanswer)\",\"questiontryagain\":\"再试一次\"},\"text\":{\"startover\":\"重置\",\"areyousure\":\"你确定要重新开始吗? (所有当前进度将被重置)\",\"youmustcomplete\":\"你必须完成\",\"exercise\":\"练习\",\"exercise_plural\":\"练习\",\"inthissection\":\"在进行本节之前\",\"code\":\"代码\",\"enginecap\":\"$t(text.code) {{engine}}\",\"quiz\":\"测试\",\"blank\":\"空\",\"blank_plural\":\"空\",\"exercisecontainsblank\":\"本练习包含{{count}}个$t(text.blank)\",\"pleasereplaceblank\":\"请在{{blank}}内填写恰当的代码\",\"unparsable\":\"这似乎不是有效的R代码。 R不知道如何将您的文本转换为完整的命令。 您是否忘了填空，忘了删除下划线，忘了在参数之间包含逗号，或者是忘了用<code>&quot;<\\/code>, <code>'<\\/code>, <code>)<\\/code>,<code>}<\\/code>来封闭<code>&quot;<\\/code>, <code>'<\\/code>, <code>(<\\/code>。 or <code>{<\\/code>。\\n\",\"unparsablequotes\":\"<p>您的R代码中似乎含有特殊格式的引号，或者弯引号(<code>{{character}}<\\/code>) 在字符串前后，在R中字符串应该被直引号(<code>&quot;<\\/code> 或者 <code>'<\\/code>)包裹。<\\/p> {{code}} <p>别担心，该错误经常在复制粘贴包含格式的代码时遇到， 您可以尝试将该行中的代码替换为以下代码，也许还有其他地方需要修改。<\\/p> {{suggestion}}\\n\",\"unparsableunicode\":\"<p>您的代码中似乎包含有异常字符(<code>{{character}}<\\/code>),导致代码无效。<\\/p> {{code}} <p>有时候你的代码可能含有看似正常字符的特殊字符，特别是当你复制粘贴其他来源代码的时候。 请试着删除这些特殊字符,重新输入<\\/p>\\n\",\"unparsableunicodesuggestion\":\"<p>您的代码中似乎包含有异常字符(<code>{{character}}<\\/code>),导致代码无效。<\\/p> {{code}} <p>有时候你的代码可能含有看似正常字符的特殊字符，特别是当你复制粘贴其他来源代码的时候。 请试着删除这些特殊字符,重新输入<\\/p>\\n\",\"and\":\"且\",\"or\":\"或\",\"listcomma\":\",\",\"oxfordcomma\":\",\"}}},\"pl\":{\"translation\":{\"button\":{\"runcode\":\"Uruchom kod\",\"runcodetitle\":\"$t(button.runcode) ({{kbd}})\",\"hint\":\"Podpowiedź\",\"hint_plural\":\"Podpowiedzi\",\"hinttitle\":\"$t(button.hint)\",\"hintnext\":\"Następna podpowiedź\",\"hintprev\":\"Poprzednia podpowiedź\",\"solution\":\"Rozwiązanie\",\"solutiontitle\":\"$t(button.solution)\",\"copyclipboard\":\"Kopiuj do schowka\",\"startover\":\"Zacznij od początku\",\"startovertitle\":\"$t(button.startover)\",\"continue\":\"Kontynuuj\",\"submitanswer\":\"Wyślij\",\"submitanswertitle\":\"$t(button.submitanswer)\",\"previoustopic\":\"Poprzednia sekcja\",\"nexttopic\":\"Następna sekcja\",\"questionsubmit\":\"$t(button.submitanswer)\",\"questiontryagain\":\"Spróbuj ponownie\"},\"text\":{\"startover\":\"Zacznij od początku\",\"areyousure\":\"Czy na pewno chcesz zacząć od początku? (cały postęp w zadaniu zostanie utracony)\",\"youmustcomplete\":\"Musisz ukończyć\",\"exercise\":\"ćwiczenie\",\"exercise_plural\":\"ćwiczenia\",\"inthissection\":\"w tej sekcji przed kontynuowaniem\",\"code\":\"Kod\",\"enginecap\":\"$t(text.code) {{engine}}\",\"quiz\":\"Quiz\",\"blank\":\"luka\",\"blank_plural\":\"luk(i)\",\"exercisecontainsblank\":\"To ćwiczenie zawiera {{count}} $t(text.blank).\",\"pleasereplaceblank\":\"Proszę uzupełnić {{blank}} prawidłowym kodem.\",\"unparsable\":\"Wygląda na to, że może to nie być prawidłowy kod R. R nie jest w stanie przetworzyć Twojego tekstu na polecenie. Mogłeś(-aś) zapomnieć wypełnić luki, usunąć podkreślnik, umieścić przecinka między argumentami, lub zamknąć znak <code>&quot;<\\/code>, <code>'<\\/code>, <code>(<\\/code> lub <code>{<\\/code> odpowiadającym <code>&quot;<\\/code>, <code>'<\\/code>, <code>)<\\/code> lub <code>}<\\/code>.\\n\",\"unparsablequotes\":\"<p>Wygląda na to, że Twój kod zawiera szczególnie sformatowane cudzysłowy lub cudzysłowy typograficzne (<code>{{character}}<\\/code>) przy ciągach znaków, co sprawia, że kod jest niepoprawny. R wymaga cudzysłowów prostych (<code>&quot;<\\/code> albo <code>'<\\/code>).<\\/p> {{code}} <p>Nie martw się, to powszechne źródło błędów, gdy kopiuje się kod z innego programu, który sam formatuje teskt. Możesz spróbować zastąpić swój kod następującym kodem. Mogą być też inne miejsca, które wymagają poprawienia.<\\/p> {{suggestion}}\\n\",\"unparsableunicode\":\"<p>Wygląda na to, że Twój kod zawiera niespodziewany znak specjalny (<code>{{character}}<\\/code>), co sprawia, że kod jest niepoprawny.<\\/p> {{code}} <p>Czasami Twój kod może zawierać znak specjalny, który wygląda jak zwykły znak, zwłaszcza jeśli kopiujesz kod z innego programu. Spróbuj usunąć znak specjalny i wpisać do ponownie ręcznie.<\\/p>\\n\",\"unparsableunicodesuggestion\":\"<p>Wygląda na to, że Twój kod zawiera niespodziewany znak specjalny (<code>{{character}}<\\/code>), co sprawia, że kod jest niepoprawny.<\\/p> {{code}} <p>Czasami Twój kod może zawierać znak specjalny, który wygląda jak zwykły znak, zwłaszcza jeśli kopiujesz kod z innego programu. Możesz spróbować zastąpić swój kod następującym kodem. Mogą być też inne miejsca, które wymagają poprawienia.<\\/p> {{suggestion}}\\n\",\"and\":\"i\",\"or\":\"lub\",\"listcomma\":\", \",\"oxfordcomma\":\"\"}}}}}<\/script>"]},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-format"]},{"type":"character","attributes":{},"value":["0.11.4"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmarkdown/templates/tutorial/resources"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-format.js"]},{"type":"character","attributes":{},"value":["tutorial-format.css","rstudio-theme.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["3.6.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/3.6.0"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery-3.6.0.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquerylib"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.1.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["navigation"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/navigation-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tabsets.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.22"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["default.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.22"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["3.6.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/3.6.0"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery-3.6.0.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquerylib"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.1.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["font-awesome"]},{"type":"character","attributes":{},"value":["6.4.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["fontawesome"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/all.min.css","css/v4-shims.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["fontawesome"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.5.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootbox"]},{"type":"character","attributes":{},"value":["5.5.2"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/bootbox"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["bootbox.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["idb-keyvalue"]},{"type":"character","attributes":{},"value":["3.2.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/idb-keyval"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["idb-keyval-iife-compat.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.11.4"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ionrangeslider-javascript"]},{"type":"character","attributes":{},"value":["2.3.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["www/shared/ionrangeslider"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/ion.rangeSlider.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["shiny"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.7.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["strftime"]},{"type":"character","attributes":{},"value":["0.9.2"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["www/shared/strftime"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["strftime-min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["shiny"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.7.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ionrangeslider-css"]},{"type":"character","attributes":{},"value":["2.3.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["www/shared/ionrangeslider"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/ion.rangeSlider.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["shiny"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.7.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ionrangeslider-javascript"]},{"type":"character","attributes":{},"value":["2.3.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["www/shared/ionrangeslider"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/ion.rangeSlider.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["shiny"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.7.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["strftime"]},{"type":"character","attributes":{},"value":["0.9.2"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["www/shared/strftime"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["strftime-min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["shiny"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.7.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ionrangeslider-css"]},{"type":"character","attributes":{},"value":["2.3.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["www/shared/ionrangeslider"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/ion.rangeSlider.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["shiny"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.7.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ionrangeslider-javascript"]},{"type":"character","attributes":{},"value":["2.3.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["www/shared/ionrangeslider"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/ion.rangeSlider.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["shiny"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.7.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["strftime"]},{"type":"character","attributes":{},"value":["0.9.2"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["www/shared/strftime"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["strftime-min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["shiny"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.7.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ionrangeslider-css"]},{"type":"character","attributes":{},"value":["2.3.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["www/shared/ionrangeslider"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/ion.rangeSlider.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["shiny"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["1.7.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["2.0.10"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["2.0.10"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["2.0.10"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["2.0.10"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["2.0.10"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["2.0.10"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["2.0.10"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["2.0.10"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.11.4"]}]}]}
+</script>
+<!--/html_preserve-->
+<!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="execution_dependencies">
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88]}},"value":[{"type":"character","attributes":{},"value":["backports","base","bslib","cachem","checkmate","cli","colorspace","commonmark","compiler","datasets","digest","dplyr","ellipsis","evaluate","fansi","farver","fastmap","fontawesome","forcats","generics","ggforce","ggformula","ggplot2","ggridges","ggstance","glue","graphics","grDevices","grid","gtable","haven","highr","hms","htmltools","htmlwidgets","httpuv","jquerylib","jsonlite","knitr","labeling","labelled","later","lattice","learnr","lifecycle","magrittr","markdown","MASS","Matrix","memoise","methods","mgcv","mime","mosaic","mosaicCore","mosaicData","munsell","nlme","pillar","pkgconfig","polyclip","promises","purrr","R6","Rcpp","rlang","rmarkdown","rprojroot","rstudioapi","sass","scales","shiny","splines","stats","stringi","stringr","tibble","tidyr","tidyselect","tools","tweenr","utf8","utils","vctrs","withr","xfun","xtable","yaml"]},{"type":"character","attributes":{},"value":["1.4.1","4.3.1","0.5.0","1.0.8","2.2.0","3.6.1","2.1-0","1.9.0","4.3.1","4.3.1","0.6.31","1.1.2","0.3.2","0.21","1.0.4","2.1.1","1.1.1","0.5.1","1.0.0","0.1.3","0.4.1","0.10.4","3.4.2","0.5.4","0.3.6","1.6.2","4.3.1","4.3.1","4.3.1","0.3.3","2.5.2","0.10","1.1.3","0.5.5","1.6.2","1.6.11","0.1.4","1.8.5","1.43","0.4.2","2.11.0","1.3.1","0.21-8","0.11.4","1.0.3","2.0.3","1.7","7.3-60","1.5-4.1","2.0.1","4.3.1","1.8-42","0.12","1.8.4.2","0.9.2.1","0.20.3","0.5.0","3.1-162","1.9.0","2.0.3","1.10-4","1.2.0.1","1.0.1","2.5.1","1.0.10","1.1.1","2.22","2.0.3","0.14","0.4.6","1.2.1","1.7.4","4.3.1","4.3.1","1.7.12","1.5.0","3.2.1","1.3.0","1.2.0","4.3.1","2.0.2","1.2.3","4.3.1","0.6.3","2.5.0","0.39","1.8-4","2.3.7"]}]}]}
+</script>
+<!--/html_preserve-->
+</div>
+
+</article> <!-- topics -->
+
+<div class="topicsContainer">
+<div class="topicsPositioner">
+<div class="band">
+<div class="bandContent topicsListContainer">
+
+<!-- begin doc-metadata -->
+<div id="doc-metadata">
+<h1 class="title toc-ignore" style="display:none;">Count, proportion and
+presence / absence response variables</h1>
+</div>
+<!-- end doc-metadata -->
+
+</div> <!-- bandContent.topicsListContainer -->
+</div> <!-- band -->
+</div> <!-- topicsPositioner -->
+</div> <!-- topicsContainer -->
+
+
+</main> <!-- bandContent page -->
+</div> <!-- pageContent band -->
+
+
+
+<!-- Build Tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("section-TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<script>
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+
+</body>
+
+</html>
