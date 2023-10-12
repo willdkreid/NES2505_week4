@@ -1,6 +1,6 @@
 ---
 title: 'Practical 4: Generalised Linear Models'
-author: "Roy Sanderson"
+author: "NES2505"
 output:
   html_document:
     df_print: paged
@@ -23,8 +23,6 @@ The overall aim of this practical is to help you have a better understanding of 
 1. Use of GLMs with counts (whole number response data)
 2. Use of GLMs with binary responses (presence / absence, dead / alive etc.)
 3. Interpret the outputs of GLM models
-
-
 
 ## Setting up for the practical  
 
@@ -94,7 +92,7 @@ gf_point(species~pollution, data = sppcount_dat) %>%
 
 ```
 
-The plot above shows a clear link between the total number of aquatic invertebrate species and the amount of pollution present in the water. It looks like there is a decrease in species with increasing pollution. How would you state a null and alternate hypotheses? 
+The plot above shows a clear link between the total number of aquatic invertebrate species and the amount of pollution present in the water. It looks like there is a decrease in species with increasing pollution. How would you state a null and alternate hypotheses for this research? 
 
 Plotting these data is not enough to say that pollution is having a negative effect on the number of species in the river. We need a formal statistical model to test this. We will begin by doing it the "wrong" way with a linear model, and diagnose what is incorrect. **Note**: Look carefully at the graph you have just created, and you might already be able to detect a potential problem. What is it?
 
@@ -111,7 +109,7 @@ summary(sppcount_lm)
 
 ```
 
-As you would expect, the model is highly significant, with a negative (significant) gradient for slope of -2.57, in other words for every 1 mg/l increase in pollution there is a decline in the number of species by about 2.57. When there is no pollution the number of species is about 29, which matches the graph you have just plotted above, when the horizontal axis of pollution is at zero.  There are two major problems however, the second of which you may already have spotted:
+As you would expect, the model is highly significant, with a negative (significant) gradient for slope of -2.57, in other words for every 1 mg/l increase in pollution there is a decline in the number of species by about 2.57. When there is no pollution the number of species is about 29, which matches the graph you have just plotted above, when the horizontal axis of pollution is at zero.  There are two major problems however, one of which you may already have spotted.
 
 ### 1.3.1 Have model assumptions been broken?
 You will recall that linear models assume your data (or more precisely, the noise or errors around your fitted line) come from a normal or Gaussian distribution. The easiest way to check this is via a QQ plot:
@@ -126,8 +124,7 @@ The plot of residuals vs fitted looks reasonable, although the scatter of points
 smaller at low fitted values than desirable. The main problem is that there is a strong S-bend in the QQ plot, hinting that there might be problems with the model and its assumptions are not satisfied.
 
 ### 1.3.1 What are the predicted numbers of species in heavily polluted rivers?
-Hopefully you have already detected that this is a fundamental problem, simply by looking at your original graph of the data, with the straight line of the number of species added. What, for example, is the predicted number of species when water pollution is at 12 mg/l ?  Let's work it out:
-
+Hopefully you have already detected that this is a fundamental problem, simply by looking at your original graph of the data, with the straight line of the number of species added. What, for example, is the predicted number of species when water pollution is at 12 mg/l ? Let's work it out:
 
 ```{r}
 # Create a predictor function
@@ -141,7 +138,7 @@ lm_species_predictor(12)
 Uh oh! We seem to be predicting a **negative** number of species, but we know that this is biological nonsense. The minimum value we should get is zero.
 
 ## 1.4 GLM and Simeon Poisson to the rescue...
-GLMs are much more flexible, and we can use them to produce a much better and biologically meaningful model. Simeon Poisson was an early 19th Century French mathematician devised a distribution that handled count rather than continuous data. See [This interactive website](https://naturalandenvironmentalscience.shinyapps.io/generalised_linear_models/#section-poisson-and-binomial-distributions) to view the Poisson distribution. When the website loads, the distribution initially looks like a normal distribution, but with whole numbers. It has one parameter $\lambda$ (Greek letter lambda). Move the slider. You will notice that the distribution never contains values less than zero.
+GLMs are much more flexible, and we can use them to produce a much better and biologically meaningful model. See [This interactive website]() to view the Poisson distribution. When the website loads, the distribution initially looks like a normal distribution, but with whole numbers. It has one parameter $\lambda$ (Greek letter lambda). Move the slider. You will notice that the distribution never contains values less than zero.
 
 Let's now change from a linear model to a generalised linear model. If we simply replace `lm()` with `glm()` we will actually get the same results as before, because it defaults to using a normal distribution. However, if we use the `family` option we can specify that we want a Poisson distribution. Try the following and check your results match:
 
@@ -156,22 +153,24 @@ You can see that both the intercept and the (gradient) for pollution are highly 
 
 So now what does this all mean. 
 
-* **deviance** is the term used for variation in your data points
-* The **deviance residuals** line gives a summary of the min, max, mean of all this variation after the model has been fitted, in other words a summary of the noise for all 30 rivers.
 * The **coefficients** are your **explanatory** variables (i.e. pollution). You may notice that there are two coefficients when our model only specified one.
-
- - `(Intercept)` As usual, this is the predicted number of species when your explanatory variable (pollution) is zero. Here the estimated value for this is 3.43, which seems very low, but keep reading.
- - `pollution` this is the change in your number of species with increasing pollution, which is negative, reflecting a decline in biodiversity with pollution. However, the value of -0.139 probably seems a bit odd
-- instead of t-statistics, maximum likelihood methods such as GLM produce z-statistics, which can be interpreted in a similar way to produce p-values. Both p-values are extremely low. Remember that `7.79-e13` is shorthand for `0.000000000000779` which you would write as `p<0.001` in a report.
-
-* The **residual deviance** is a measure of how good your model is. If your residual deviance value is close to zero, then the model is not very good. 
+* `(Intercept)` As usual, this is the predicted number of species when your explanatory variable (pollution) is zero. Here the estimated value for this is 3.43, which seems very low, but keep reading.
+* `pollution` this is the change in your number of species with increasing pollution, which is negative, reflecting a decline in biodiversity with pollution. However, the value of -0.139 probably seems a bit odd.
+* instead of t-statistics, maximum likelihood methods such as GLM produce z-statistics, which can be interpreted in a similar way to produce p-values. Both p-values are extremely low. Remember that `7.79-e13` is shorthand for `0.000000000000779` which you would write as `p<0.001` in a report.
+* The **null deviance** is the term used for variation in your data points
+* The **residual deviance** is a measure of how much variation has not been explained by your explanatory variable. If your residual deviance value is close to zero, the better your model. 
 * The **AIC** value is used when comparing two similar models, the lower the AIC, the better the model.
 * Finally, the **Fisher score** is a measure of how many iterations of the model R ran looking at different estimates before displaying the results. 
 
 There is a lot of information in the output and it is easy to get overwhelmed. The main things to note are the `Estimate` values, and when you report them in a table you would typically quote their associated z and p statistics, along with the overall AIC.
 
+The null and residual deviance are important as well because they let you know how much information is explained by your explanatory variables.
+
+$$variation\ explained = 100 *\frac{null\ deviance\ -\ residual\ deviance}{null\ deviance}$$
+See if you can calculate the variation explained using the values of the null and residual deviance from the summary table.
+
 #### What about the strange Estimates from the GLM?
-As we noted above, the values of 3.43 and -0.139 do not quite match what was expected. Indeed, looking at your original graph, an estimated number of species of only 3.43 when the water is unpolluted (x-axis at zero) does not match your graph where it looks to be around 29 or 30 species! This is because GLMs use what is known as a "link function" in their calculations; if you are interested see the [How to generalise page from the interactive website](https://naturalandenvironmentalscience.shinyapps.io/generalised_linear_models/#section-how-to-generalise). Poisson GLMs use natural logarithms as their link function, so we would need to take the antilogarithm to get back to the original units. As these are natural logarithms, (i.e. $log_e$ rather than $log_{10}$) we need to take the exponential to convert to the original units, available through the `exp()` function. Let's check with the expected number of species when pollution is zero, i.e. the intercept:
+As we noted above, the values of 3.43 and -0.139 do not quite match what was expected. Indeed, looking at your original graph, an estimated number of species of only 3.43 when the water is unpolluted (x-axis at zero) does not match your graph where it looks to be around 29 or 30 species! This is because GLMs use what is known as a "link function" in their calculations; if you are interested see the [How to generalise page from the interactive website](). Poisson GLMs use natural logarithms as their link function, so we would need to take the antilogarithm to get back to the original units. As these are natural logarithms, (i.e. $log_e$ rather than $log_{10}$) we need to take the exponential to convert to the original units, available through the `exp()` function. Let's check with the expected number of species when pollution is zero, i.e. the intercept:
 
 ```{r}
 exp(3.43)
@@ -214,21 +213,19 @@ gf_point(species ~ pollution, data=sppcount_dat) %>%
 ```
 
 
-
 ## 2. GLMs with Binary Data
 Your experiment may produce categorical response data, e.g. male or female, wilted or turgid, infected or uninfected, dead or alive. Note that a response such as simply 'dead' or 'alive' differs from a response where you have counts of the numbers of dead or alive out of your original sample. So binary data can have two slightly different forms:
 
 * Simple presence / absence; dead / alive; 0 / 1 data (binary response)
 * Information about sample size. e.g. number of eggs that hatch, out of egg clutches that vary slightly in their size between nests.
 
-The latter has more information (and is proportion data) so can be analysed slightly differently, but both use the **binomial distribution**, see [this page of the Interactive website](https://naturalandenvironmentalscience.shinyapps.io/generalised_linear_models/#section-poisson-and-binomial-distributions). In the simple binary response the sample size, shown as "Size of each trial" on the interactive graph on the website, is 1. In the second type of scenario, the sample size would vary depending on for example the size of each egg clutch in different nests.
+The latter has more information (and is proportion data) so can be analysed slightly differently, but both use the **binomial distribution**, see [this page of the Interactive website](). In the simple binary response the sample size, shown as "Size of each trial" on the interactive graph on the website, is 1. In the second type of scenario, the sample size would vary depending on for example the size of each egg clutch in different nests.
 
-In this practical we will focus on the simpler type of data, where you just have a binary response. We will use the data `lichen_dat` that you read into R at the start of this practical. In this example, you are testing the effect of atmospheric pollution on the presence or absence of lichen on trees. Lichens have been found to be very sensitive biological indicators of atmospheric pollution. As lichen presence can be affected by the tree bark, particularly calcium content, this was also measured. Your response is a 1 or 0, where 1 indicates lichen are present and 0 lichen absent. 
+In this section we will focus on the simpler type of data, where you just have a binary response. We will use the data `lichen_dat` that you read into R at the start of this practical. In this example, you are testing the effect of atmospheric pollution on the presence or absence of lichen on trees. Lichens have been found to be very sensitive biological indicators of atmospheric pollution. As lichen presence can be affected by the tree bark, particularly calcium content, this was also measured. Your response is a 1 or 0, where 1 indicates lichen are present and 0 lichen absent. 
 
 ## 2.1 Summary statistics and visualisation of lichen data
 
-Start with some visualisation and summary statistics. What do the plots bellow tell you about lichen ecology? Can you form some initial assumptions based on what they show?  
-
+Start with some visualisation and summary statistics. What do the plots below tell you about lichen ecology? Can you form some initial assumptions based on what they show?  
 
 ```{r echo=TRUE, include=TRUE}
 summary(lichen_dat)
@@ -243,7 +240,7 @@ summary(lichen_dat)
 str(lichen_dat)
 ```
 
-You can see that the `summary` function has a new variable called `lichen_fct` which will be more convenient for some plots. Let's begin with a scatter-plot of the observed points against the two explanatory variables:
+You can see that the `summary` function has a new variable called `lichen_fct` which will be more convenient for some plots. Let's begin with a scatterplot of the observed points against the two explanatory variables:
 
 ```{r}
 # Scatter plots of lichens vs calcium or air pollution
@@ -251,9 +248,9 @@ gf_point(lichen ~ calcium, data=lichen_dat)
 gf_point(lichen ~ airpoll, data=lichen_dat)
 ```
 
-The problem with these two plots is whilst you can see that there appears to be more lichens when at higher calcium and lower air pollution, the plots are actually of limited value for exploratory data visualisation. Boxplots or violinplots would be more useful. Of course, by default they place the categorical explanatory variable on the horizontal axis, and the continuous response variable on the vertical axis. But here **our response is categorical (presence or absence of lichen)**, so really we want lichen incidence on the vertical y-axis, and calcium or air pollution on the horizontal x-axis.
+The problem with these two plots is whilst you can see that there appears to be more lichens when at higher calcium and lower air pollution, the plots are actually of limited value for exploratory data visualisation. Boxplots would be more useful. Of course, by default they place the categorical explanatory variable on the horizontal axis, and the continuous response variable on the vertical axis. But here **our response is categorical (presence or absence of lichen)**, so really we want lichen incidence on the vertical y-axis, and calcium or air pollution on the horizontal x-axis.
 
-We can get round this problem by flipping our boxplots or violin plots through 90-degrees, so that the lichens still appear on the vertical axis, as we would expect for a response variable. We can do this with the `coord_flip()` option to `gf_refine()`. Both boxplots and violinplots expect categorical variables (factors) so we will use `lichen_fct` in their call.
+We can get round this problem by flipping our boxplots through 90-degrees, so that the lichens still appear on the vertical axis, as we would expect for a response variable. We can do this with the `coord_flip()` option to `gf_refine()`. Boxplots expect categorical variables (factors) so we will use `lichen_fct` in their call.
 
 Let's create a simple boxplot first to show the idea. We use the `lichen_fct` as the response, rather than `lichen` as we want a categorical variable (lichen presence or absence) in a boxplot. In previous boxplots your response has been continuous, and your explanatory categorical. However, here we put it the other way round, to reflect the biology:
 
@@ -274,7 +271,7 @@ Displaying your data this way gives you a much better insight into the relations
 
 ## 2.2 GLMs with binary response variable
 ### 2.2.1 Interaction terms in linear models and generalised linear models
-Here we have two explanatory variables, calcium and air pollution. We cannot assume that they are independent in their effects, and they may **interact** in some way in terms of their impact on the presence or absence of lichens. You have already covered interaction terms in Practical 3, and remind yourself of how they work at [interactive website explaining interaction terms](https://naturalandenvironmentalscience.shinyapps.io/multiple_explan/#section-interactions-between-explanatory-variables)
+Here we have two explanatory variables, calcium and air pollution. We cannot assume that they are independent in their effects, and they may **interact** in some way in terms of their impact on the presence or absence of lichens. You have already covered interaction terms in Practical 3, and remind yourself of how they work at [interactive website explaining interaction terms]()
 
 When a GLM contains a `:` in the explanatory variables, such as
 
@@ -290,7 +287,7 @@ and
 
 are identical. The latter type of structure to call either linear or generalised linear models with interactions can save you having to type all the main effects separately, and is especially useful with e.g. 3 (or more) explanatory variables.
 
-We will begin by running a full model including the interaction terms; however, these can be removed later if not necessary. Notice that the family for this model has been changed as we now have a binary response variable. The appropriate family to describe the error distribution when you have presence/absence data is the **binomial** distribution. Go to [interactive website](https://naturalandenvironmentalscience.shinyapps.io/generalised_linear_models/#section-poisson-and-binomial-distributions) to remind yourself of a binomial distribution. Your sample size here is 1 as there is only a single observation at each site as to whether lichen is present or absent.
+We will begin by running a full model including the interaction terms; however, these can be removed later if not necessary. Notice that the family for this model has been changed as we now have a binary response variable. The appropriate family to describe the error distribution when you have presence/absence data is the **binomial** distribution. Go to [interactive website]() to remind yourself of a binomial distribution. Your sample size here is 1 as there is only a single observation at each site as to whether lichen is present or absent.
 
 ```{r echo=TRUE, include=TRUE}
 
@@ -301,68 +298,23 @@ summary(lichen_glm1)
 
 The output is very similar to the previous GLM, but here we have four parameters estimated, the intercept, the two "main effects" for air pollution and calcium, and the interaction term. You can see that all four are non-significant, so you might be tempted to assume there is nothing going on. However:
 
-* Think back to your violinplots (or boxplots) of the lichens and these environmental variables. These seem to suggest some sort of relationship.
+* Think back to your boxplots of the lichens and these environmental variables. These seem to suggest some sort of relationship.
 * Always look at the interaction term first. If it is non-significant, refit the model without the interaction term.
 
-### 2.2.2 Two ways to update your (linear or) generalised linear model
-When you have the results of a model with one or more interaction terms, the best strategy is to:
+Now refit the model without the interaction term. Check to make sure the code is correct; there may be some mistakes!
 
-* refit the model without the most complicated non-significant interaction term (here simply the `airpoll:calcium` term)
-* look at the `summary()` of the model
-* see if the simpler model is significantly different from the more complex one using `anova()`
-* repeat if needed
-
-There are actually two ways available to refit your model without the interaction term, and you can use both approaches for models fit with either `lm()` or `glm()`. The first is fairly obvious:
-
-```{r, eval=FALSE}
+```{r include = FALSE}
 lichen_glm2 <- glm(lichen ~ airpoll + calcium, data = lichen_dat, family = binomial)
+```
+
+```
+lichen_glm2 <- glm(licen ~ airpoll calcium, data = lichen_dat, family = binomil)
 summary(lichen_glm2)
 ```
-
-The second "shorthand" method is useful if you start off with lots of interaction terms and gradually want to simplify your model, as it saves the amount you need to type. When you have 3 interaction terms you actually estimate lots of parameters:
-
-1. Intercept
-2. Explan1 (main effect)
-3. Explan2 (main effect)
-4. Explan3 (main effect)
-5. Explan1:Explan2 (2-way interaction)
-6. Explan1:Explan3 (2-way interaction)
-7. Explan2:Explan3 (2-way interaction)
-8. Explan1:Explan2:Explan3 (3-way interaction)
-
-The situation gets worse the more explanatory variables you have. So if you need to simplify your model, having to explicitly retype all the possible terms to keep can easily result in typing errors. Here it is not a major problem, as you only have one interaction term to worry about. The trick is to `update()` your original model, and remove the non-significant interaction term:
-
-```{r}
-lichen_glm2 <- update(lichen_glm1, . ~ . -airpoll:calcium)
-```
-
-The syntax of the `update()` function can be a little confusing, so let's break it down:
-
-* `lichen_glm1` this was our original "full" model, that we want to simplify
-* `. ~ .` This is the `response ~ explanatory` equation. You are probably wondering why the variable names are not specified. By simply putting a `.` symbol to the left and right of the `~` symbol, you are telling `update()` to begin with the same set of response and explanatory variables as are defined in `lichen_glm1`
-* `-airpoll:calcium`This now tells `update()` to **delete the interaction term** as it has a minus symbol in front of it.
-
-If you have a complex `lm()` or `glm()` model that would take you several attempts to simplify, the `update()` function can save on typing. Now check the results of the simplified GLM model:
-
-```{r, echo=FALSE}
-summary(lichen_glm2)
-```
-
 Notice now that the main effects for air pollution and calcium are significant after removing the interaction term. Also, the **AIC** value is lower in the second model meaning this model is an improvement over the more complex one we ran earlier. What do the results of this simpler model tell you about lichen and its relationship with calcium and air pollution?
 
-You might want to know if this simpler model is a significant improvement on the first, and you can use the `anova()` function to do this. As you know, by default `anova()` calculates "sums of squares", "mean squares" (old-fashioned name for variances) and "F-ratios" as part of the process of testing for significance to calculate a p-value. However, GLMs do not use mean squares, instead they use "maximum likelihood" to estimate parameters. Therefore we have to tell the `anova()` function to do a Chi-squared test to see if the two models are the same:
-
-`````{r, eval=FALSE}
-anova(lichen_glm1, lichen_glm2, test="Chisq")
-```
-```{r, echo=FALSE}
-print(anova(lichen_glm1, lichen_glm2, test="Chisq"))
-```
-
-At first this is a bit confusing; it says there is no difference (p greater than 0.05) in the models! The way to interpret this is that the second, simpler model, is just as effective as the overly complicated one that contained the interaction term. The second model is simpler, has a lower AIC indicating it is better, and is just as effective, so is the one to use.
-
 ### 2.2.3 Checking binomial model assumptions and making predictions
-It is actually quite difficult to interpret the residuals from a binomial model, because the response variable is binary. Therefore, whilst you can create a QQ plot, do not be surprised if the plot shows quite a big curve in it. Some people recommend the `binnedplot()` function from the `arm` R package, which we have not used in this course. If you wish, feel free to investigate it, but it is entirely optional.
+It is actually quite difficult to interpret the residuals from a binomial model, because the response variable is binary. Therefore, whilst you can create a QQ plot, do not be surprised if the plot shows quite a big curve in it.
 
 You can of course make a prediction from your model. First, let us produce a plot of the predicted probability of lichen at different calcium levels. To avoid the problem of all the points for presence or absence of lichen overlapping each other, we will use `gf_jitter()` instead of `gf_point()`. The `height` option controls how much "jitter" there is around the points. The `gf_smooth()` function is again used to add the fitted line, but now we have to specify that the `binomial` error family is used. As usual, build up the plot one line at a time, to see what happens, adding a `%>%` symbol at the end of the preceding line when you want to add a new one:
 
@@ -380,10 +332,9 @@ lichen_glm_predict <- makeFun(lichen_glm2)
 round(lichen_glm_predict(calcium=2, airpoll=5), 4)
 ```
 
-
-# 3. Binomial GLMs where the sample size varies
+# 3. Binomial GLMs where the sample size varies (OPTIONAL ONLY)
 ## 3.1 Sample sizes in binomial GLMs
-The lichen example had a sample size of one, in that one record (presence or absence of lichen) was available at each site. However, if you look at the [interactive description of binomial distributions](https://naturalandenvironmentalscience.shinyapps.io/generalised_linear_models/#section-poisson-and-binomial-distributions) you can see that we can we can in fact vary the sample size. Initially on the website it is set a 1, but you can change this and see what happens.
+The lichen example had a sample size of one, in that one record (presence or absence of lichen) was available at each site. However, if you look at the [interactive description of binomial distributions]() you can see that we can we can in fact vary the sample size. Initially on the website it is set a 1, but you can change this and see what happens.
 
 We can take this extra information into account when doing the analyses. The `beetle_dat` dataset you imported at the start shows the numbers of flour beetles that are killed with different does of the insecticide carbon disulphide (mg/l). View the data using the usual R commands to get an understanding of it. It is no surpise to see that the mortality rate increases with pesticide dose. The `Mortality_rate` has been calculated as `Number_killed` divided by `Number_tested`. See if you can create a plot similar to the following:
 

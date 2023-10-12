@@ -331,7 +331,7 @@ sppcount_lm <- lm(species~pollution, data=sppcount)
 summary(sppcount_lm)
 
 # Display first two diagnostic plots
-mplot(sppcount_lm, which=1:2)
+mplot(sppcount_lm, which=c(1:2))
 ```
 
 At first site the linear model looks quite good, with a highly significant
@@ -410,7 +410,7 @@ sppcount_glm <- glm(species~pollution, family = poisson(link = "log"), data=sppc
 
 ```{r sppcount_diag, echo = TRUE}
 # Display first two diagnostic plots
-mplot(sppcount_glm, which = 1:2)
+mplot(sppcount_glm, which = c(1:2))
 ```
 
 The QQ plot has an S-shaped curve, but this is less than before.
