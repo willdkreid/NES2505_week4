@@ -16,7 +16,7 @@ Generalised linear models (GLMs) are, as their name suggests, an extension of th
 
 If you use a conventional linear model with these types of data, when you check the model assumptions, especially via a QQ plot, you may observe distortions, suggesting the linear model is not valid. You can sometimes transform your data before analysis by a linear model, for example take the `log(number_of_birds + 1)` as a response variable (we include the `+ 1` as it is not possible to take a logarithm of zero). However, it is usually better to use a generalised linear model from the outset.
 
-A linear model works best with normal (Gaussian) data, but a GLM can be extended to a wide range of data types, including all four described above. To remind yourself of the underlying theory of GLMs go to [This Interactive Website]() and we will begin by using some of the examples from that website.
+A linear model works best with normal (Gaussian) data, but a GLM can be extended to a wide range of data types, including all four described above. To remind yourself of the underlying theory of GLMs go to [This Interactive Website](https://naturalandenvironmentalscience.shinyapps.io/NES2505GLM/#section-normal-distribution) and we will begin by using some of the examples from that website.
 
 The overall aim of this practical is to help you have a better understanding of GLMs, how to set them up in R/RStudio, and learn how to interpret their outputs. Specific objectives of Practical 4 are:
 
@@ -126,26 +126,26 @@ smaller at low fitted values than desirable. The main problem is that there is a
 ### 1.3.1 What are the predicted numbers of species in heavily polluted rivers?
 Hopefully you have already detected that this is a fundamental problem, simply by looking at your original graph of the data, with the straight line of the number of species added. What, for example, is the predicted number of species when water pollution is at 12 mg/l ? Let's work it out:
 
-```{r}
-# Create a predictor function
-lm_species_predictor <- makeFun(sppcount_lm)
+```
+# Create a predictor function - what goes in the ()
+lm_species_predictor <- makeFun()
 
-# Obtain predicted value at 12 mg/l
-lm_species_predictor(12)
+# Obtain predicted value at 12 mg/l - what goes in the ()
+lm_species_predictor()
 
 ```
 
 Uh oh! We seem to be predicting a **negative** number of species, but we know that this is biological nonsense. The minimum value we should get is zero.
 
 ## 1.4 GLM and Simeon Poisson to the rescue...
-GLMs are much more flexible, and we can use them to produce a much better and biologically meaningful model. See [This interactive website]() to view the Poisson distribution. When the website loads, the distribution initially looks like a normal distribution, but with whole numbers. It has one parameter $\lambda$ (Greek letter lambda). Move the slider. You will notice that the distribution never contains values less than zero.
+GLMs are much more flexible, and we can use them to produce a much better and biologically meaningful model. See [This interactive website](https://naturalandenvironmentalscience.shinyapps.io/NES2505GLM/#section-poisson-distribution) to view the Poisson distribution. When the website loads, the distribution initially looks like a normal distribution, but with whole numbers. It has one parameter $\lambda$ (Greek letter lambda). Move the slider. You will notice that the distribution never contains values less than zero.
 
 Let's now change from a linear model to a generalised linear model. If we simply replace `lm()` with `glm()` we will actually get the same results as before, because it defaults to using a normal distribution. However, if we use the `family` option we can specify that we want a Poisson distribution. Try the following and check your results match:
 
 
-```{r echo=TRUE, include=TRUE}
+```
 sppcount_glm <- glm(species ~ pollution, data = sppcount_dat, family = poisson(link = "log"))
-summary(sppcount_glm)
+summary() # what goes in the ()
 
 ```
 
@@ -181,9 +181,9 @@ That looks more sensible based on our original scatterplot of the data. To finis
 ### 1.4.1 Check Poisson GLM model assumptions
 As before, create a QQ plot of the residuals. Copy, paste and edit your original `gf_qq()` and `gf_line()` code in your `Practical_4.R` script to save time typing. You should end up with a graph similar to this:
 
-```{r, echo=FALSE}
-# Check GLM model assumptions - these look good
-plot(sppcount_glm, which = 1:2)
+```
+# Check GLM model assumptions - these look good but can you remember how to display the first two plots?
+plot(sppcount_glm)
 ```
 
 Although the QQ plot still shows a slight S-bend in the scatter of points, it is nothing like as severe a problem as we had with the linear model of the same data, so we can be much more confident about the model.
@@ -191,7 +191,7 @@ Although the QQ plot still shows a slight S-bend in the scatter of points, it is
 ### 1.4.2 What is the predicted number of species in heavily polluted streams with the GLM?
 With the linear model we had the problem that our model could predict negative numbers of species in polluted water. What do we get with the GLM? Modify your `makeFun()` call to create a new `glm_species_predictor()` function, and see if you get this value for 12 mg/l pollution?
 
-```{r, echo=FALSE}
+```
 # Create a predictor function
 glm_species_predictor <- makeFun(sppcount_glm)
 
@@ -219,7 +219,7 @@ Your experiment may produce categorical response data, e.g. male or female, wilt
 * Simple presence / absence; dead / alive; 0 / 1 data (binary response)
 * Information about sample size. e.g. number of eggs that hatch, out of egg clutches that vary slightly in their size between nests.
 
-The latter has more information (and is proportion data) so can be analysed slightly differently, but both use the **binomial distribution**, see [this page of the Interactive website](). In the simple binary response the sample size, shown as "Size of each trial" on the interactive graph on the website, is 1. In the second type of scenario, the sample size would vary depending on for example the size of each egg clutch in different nests.
+The latter has more information (and is proportion data) so can be analysed slightly differently, but both use the **binomial distribution**, see [this page of the Interactive website](https://naturalandenvironmentalscience.shinyapps.io/NES2505GLM/#section-binomial-distribution). In the simple binary response the sample size, shown as "Size of each trial" on the interactive graph on the website, is 1. In the second type of scenario, the sample size would vary depending on for example the size of each egg clutch in different nests.
 
 In this section we will focus on the simpler type of data, where you just have a binary response. We will use the data `lichen_dat` that you read into R at the start of this practical. In this example, you are testing the effect of atmospheric pollution on the presence or absence of lichen on trees. Lichens have been found to be very sensitive biological indicators of atmospheric pollution. As lichen presence can be affected by the tree bark, particularly calcium content, this was also measured. Your response is a 1 or 0, where 1 indicates lichen are present and 0 lichen absent. 
 

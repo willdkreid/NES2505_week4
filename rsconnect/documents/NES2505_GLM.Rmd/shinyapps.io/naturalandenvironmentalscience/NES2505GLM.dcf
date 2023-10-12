@@ -5,7 +5,7 @@ account: naturalandenvironmentalscience
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 10172778
-bundleId: 7795776
+bundleId: 7795904
 url: https://naturalandenvironmentalscience.shinyapps.io/NES2505GLM/
 version: 1
 asMultiple: FALSE

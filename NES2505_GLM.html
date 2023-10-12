@@ -511,7 +511,7 @@ sppcount_lm &lt;- lm(species~pollution, data=sppcount)
 summary(sppcount_lm)
 
 # Display first two diagnostic plots
-mplot(sppcount_lm, which=1:2)</code></pre>
+mplot(sppcount_lm, which=c(1:2))</code></pre>
 </div>
 <p>At first site the linear model looks quite good, with a highly
 significant negative effect of pollution on the count of species, and
@@ -615,7 +615,7 @@ deviance\ -\ residual\ deviance}{null\ deviance}\]</span></p>
 in species richness. This is worth reporting in your results.</p>
 <p>Let’s have a look at the GLM diagnostics.</p>
 <pre class="r"><code># Display first two diagnostic plots
-mplot(sppcount_glm, which = 1:2)</code></pre>
+mplot(sppcount_glm, which = c(1:2))</code></pre>
 <pre><code>## [[1]]</code></pre>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="NES2505_GLM_files/figure-html/sppcount_diag-1.png" width="624" /></p>
@@ -933,6 +933,7 @@ Getting started with Generalized Linear Models</a>
 <script type="application/shiny-prerendered" data-context="server-start">
 library(learnr)
 library(mosaic)
+library(ggrepel)
 sppcount <- read.csv("Data/sppcount.csv")
 lichens_dat  <- read.csv("Data/lichen.csv")
 knitr::opts_chunk$set(echo = FALSE)
@@ -997,7 +998,7 @@ output$`tutorial-exercise-sppcount_lm-output` <- renderUI({
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::store_exercise_cache(structure(list(label = "sppcount_lm", global_setup = structure(c("library(learnr)", 
-"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"library(mosaic)", "library(ggrepel)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
 "lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
 ), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
     chunks = list(list(label = "sppcount_lm", code = "", opts = list(
@@ -1005,7 +1006,7 @@ learnr:::store_exercise_cache(structure(list(label = "sppcount_lm", global_setup
     code_check = NULL, error_check = NULL, check = NULL, solution = structure(c("# Create scatterplot", 
     "gf_point(species ~ pollution, data=sppcount)", "", "# Create linear model, check coefficients and R-squared", 
     "sppcount_lm <- lm(species~pollution, data=sppcount)", "summary(sppcount_lm)", 
-    "", "# Display first two diagnostic plots", "mplot(sppcount_lm, which=1:2)"
+    "", "# Display first two diagnostic plots", "mplot(sppcount_lm, which=c(1:2))"
     ), chunk_opts = list(label = "sppcount_lm-solution")), tests = NULL, 
     options = list(eval = FALSE, echo = TRUE, results = "markup", 
         tidy = FALSE, tidy.opts = NULL, collapse = FALSE, prompt = FALSE, 
@@ -1040,7 +1041,7 @@ output$`tutorial-exercise-sppcount_lm_predict-output` <- renderUI({
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::store_exercise_cache(structure(list(label = "sppcount_lm_predict", global_setup = structure(c("library(learnr)", 
-"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"library(mosaic)", "library(ggrepel)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
 "lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
 ), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
     chunks = list(list(label = "sppcount_lm_predict", code = "sppcount_lm <- lm(species ~ pollution, data = sppcount)\n\n", 
@@ -1083,7 +1084,7 @@ output$`tutorial-exercise-sppcount_glm-output` <- renderUI({
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::store_exercise_cache(structure(list(label = "sppcount_glm", global_setup = structure(c("library(learnr)", 
-"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"library(mosaic)", "library(ggrepel)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
 "lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
 ), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
     chunks = list(list(label = "sppcount_glm", code = "", opts = list(
@@ -1118,25 +1119,25 @@ learnr:::store_exercise_cache(structure(list(label = "sppcount_glm", global_setu
 
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "lm_v_glm", question = structure("What happens if I run glm() without specifying the family?", html = TRUE, class = c("html", 
-"character")), answers = list(structure(list(id = "lnr_ans_fc763e5", 
+"character")), answers = list(structure(list(id = "lnr_ans_ae0da1c", 
     option = "It uses a normal distribution estimated by least squares", 
     value = "It uses a normal distribution estimated by least squares", 
     label = structure("It uses a normal distribution estimated by least squares", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. It uses a normal (Gaussian) distribution, but\nestimates by maximum likelihood. The coefficients for the\nintercept and gradient will be the same, but AIC and deviance\nwill show.", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_a3fd79c", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_49c3e02", 
     option = "It uses a binomial distribution estimated by maximum likelihood", 
     value = "It uses a binomial distribution estimated by maximum likelihood", 
     label = structure("It uses a binomial distribution estimated by maximum likelihood", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. It defaults to a normal (Gaussian) distribution, but\nestimates by maximum likelihood.", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_5830f81", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_7663428", 
     option = "It uses a Poisson distribution estimated by maximum likelihood", 
     value = "It uses a Poisson distribution estimated by maximum likelihood", 
     label = structure("It uses a Poisson distribution estimated by maximum likelihood", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. It defaults to a normal (Gaussian) distribution, but\nestimates by maximum likelihood.", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_e881de2", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_497756d", 
     option = "It uses a Gaussian distribution estimated by maximum likelihood", 
     value = "It uses a Gaussian distribution estimated by maximum likelihood", 
     label = structure("It uses a Gaussian distribution estimated by maximum likelihood", html = TRUE, class = c("html", 
@@ -1149,7 +1150,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
 "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", 
 "character")), message = NULL, post_message = NULL), ids = list(
     answer = "lm_v_glm-answer", question = "lm_v_glm"), loading = NULL, 
-    random_answer_order = TRUE, allow_retry = TRUE, seed = 513607823.760833, 
+    random_answer_order = TRUE, allow_retry = TRUE, seed = 876056023.092055, 
     options = list()), class = c("learnr_radio", "tutorial_question"
 )), session = session)
 </script>
@@ -1164,7 +1165,7 @@ output$`tutorial-exercise-make_glm_prediction-output` <- renderUI({
 
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::store_exercise_cache(structure(list(label = "make_glm_prediction", global_setup = structure(c("library(learnr)", 
-"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"library(mosaic)", "library(ggrepel)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
 "lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
 ), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
     chunks = list(list(label = "make_glm_prediction", code = "sppcount_glm <- glm(species~pollution, family = \"poisson\", data=sppcount)\nsppcount_fit <- makeFun(sppcount_glm)\nsppcount_fit(pollution = 3.64, se.fit= TRUE)", 
@@ -1197,25 +1198,25 @@ learnr:::store_exercise_cache(structure(list(label = "make_glm_prediction", glob
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "recode", question = structure("Looking at the summary output above, what might be useful to do before\nvisualising and analysing the data?", html = TRUE, class = c("html", 
-"character")), answers = list(structure(list(id = "lnr_ans_d9a67d2", 
+"character")), answers = list(structure(list(id = "lnr_ans_9fdbc27", 
     option = "Since pH uses a log scale, it is essential to log-transform\n                the calcium content", 
     value = "Since pH uses a log scale, it is essential to log-transform\n                the calcium content", 
     label = structure("Since pH uses a log scale, it is essential to log-transform\nthe calcium content", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. Whilst pH does use log, it is\nbased on hydrogen-ion concentration not calcium", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_927fb79", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_8a74210", 
     option = "Standardise the air pollution to zero mean and unit standard\n                deviation", 
     value = "Standardise the air pollution to zero mean and unit standard\n                deviation", 
     label = structure("Standardise the air pollution to zero mean and unit standard\ndeviation", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No, this is not essential, although be\naware that this is sometimes useful if the explanatory variables\nare on very different scales", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_3751fc3", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_9e4fbe4", 
     option = "Standardise the calcium to zero mean and unit standard\n                deviation", 
     value = "Standardise the calcium to zero mean and unit standard\n                deviation", 
     label = structure("Standardise the calcium to zero mean and unit standard\ndeviation", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No, this is not essential, although be\naware that this is sometimes useful if the explanatory variables\nare on very different scales", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_12582d", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_fd2da42", 
     option = "Convert the presence and absence of lichen to a factor", 
     value = "Convert the presence and absence of lichen to a factor", 
     label = structure("Convert the presence and absence of lichen to a factor", html = TRUE, class = c("html", 
@@ -1228,7 +1229,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
 "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", 
 "character")), message = NULL, post_message = NULL), ids = list(
     answer = "recode-answer", question = "recode"), loading = NULL, 
-    random_answer_order = FALSE, allow_retry = TRUE, seed = 1471993066.31455, 
+    random_answer_order = FALSE, allow_retry = TRUE, seed = 430833544.799378, 
     options = list()), class = c("learnr_radio", "tutorial_question"
 )), session = session)
 </script>
@@ -1243,7 +1244,7 @@ output$`tutorial-exercise-boxplot_calcium-output` <- renderUI({
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::store_exercise_cache(structure(list(label = "boxplot_calcium", global_setup = structure(c("library(learnr)", 
-"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"library(mosaic)", "library(ggrepel)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
 "lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
 ), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
     chunks = list(list(label = "boxplot_calcium", code = "# Create a factor for the lichen presence/absence\nlichens_dat$lichen_fct <- as.factor(lichens_dat$lichen)\nsummary(lichens_dat) # lichen_fct presence/absence now scores as 0/1 factor\n\ngf_boxplot(calcium ~ lichen_fct, data=lichens_dat) %>% \n  gf_refine(coord_flip()) # Flips horizontally. Note double-bracket", 
@@ -1287,7 +1288,7 @@ output$`tutorial-exercise-boxplot_airpoll-output` <- renderUI({
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::store_exercise_cache(structure(list(label = "boxplot_airpoll", global_setup = structure(c("library(learnr)", 
-"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"library(mosaic)", "library(ggrepel)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
 "lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
 ), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
     chunks = list(list(label = "boxplot_airpoll", code = "", 
@@ -1324,19 +1325,19 @@ learnr:::store_exercise_cache(structure(list(label = "boxplot_airpoll", global_s
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "which_lichen_model", 
     question = structure("Which term(s) should be removed for the simpler model?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_62bfc05", 
+    "character")), answers = list(structure(list(id = "lnr_ans_ead2a05", 
         option = "All terms are non-significant terms, therefore we cannot make\n                a simpler model", 
         value = "All terms are non-significant terms, therefore we cannot make\n                a simpler model", 
         label = structure("All terms are non-significant terms, therefore we cannot make\na simpler model", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("No. Always look at the interaction\nterm first", html = TRUE, class = c("html", 
         "character")), type = "literal"), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_a5e883b", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_af197bf", 
         option = "Only keep airpoll as it appears to be most important", 
         value = "Only keep airpoll as it appears to be most important", 
         label = structure("Only keep airpoll as it appears to be most important", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("No.\nSince the interaction term is non-significant it should be\nremoved first", html = TRUE, class = c("html", 
         "character")), type = "literal"), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_b4225aa", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_4de6fd4", 
         option = "The interaction term should be removed first and the new model\n                tested", 
         value = "The interaction term should be removed first and the new model\n                tested", 
         label = structure("The interaction term should be removed first and the new model\ntested", html = TRUE, class = c("html", 
@@ -1350,7 +1351,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
     "character")), message = NULL, post_message = NULL), ids = list(
         answer = "which_lichen_model-answer", question = "which_lichen_model"), 
     loading = NULL, random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 660679077.692347, options = list()), class = c("learnr_radio", 
+    seed = 2010236441.06391, options = list()), class = c("learnr_radio", 
 "tutorial_question")), session = session)
 </script>
  
@@ -1364,7 +1365,7 @@ output$`tutorial-exercise-simpler_lichen_glm-output` <- renderUI({
 
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::store_exercise_cache(structure(list(label = "simpler_lichen_glm", global_setup = structure(c("library(learnr)", 
-"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"library(mosaic)", "library(ggrepel)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
 "lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
 ), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
     chunks = list(list(label = "simpler_lichen_glm", code = "", 
@@ -1405,7 +1406,7 @@ output$`tutorial-exercise-lichen_fit_and_plot2-output` <- renderUI({
 
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::store_exercise_cache(structure(list(label = "lichen_fit_and_plot2", global_setup = structure(c("library(learnr)", 
-"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"library(mosaic)", "library(ggrepel)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
 "lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
 ), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
     chunks = list(list(label = "lichen_fit_and_plot2", code = "gf_jitter(lichen ~ calcium, data=lichens_dat, height=0.05) %>% \n  gf_smooth(method = \"glm\", method.args=list(family=\"binomial\"), se=TRUE)", 
