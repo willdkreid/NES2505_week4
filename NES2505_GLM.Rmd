@@ -16,16 +16,12 @@ knitr::opts_chunk$set(echo = FALSE)
 ## Introduction
 ### Linear models
 In the last two weeks, we have been looking at linear models using `lm()`. The
-response data you've looked at has been continuous numerical data, potentially with 
+response data you've looked at has been numerical continuous data, potentially with 
 decimal points.
 
 ### Data types
 Your response variable may not always be a continuous numerical one. In biology
-you may be dealing with the numbers of birds in a wood
-(whole numbers), percentage of crop damage by a pathogen (bounded 0 to 100) or
-dead/alive (categorical data). Thinking about your data type allows you to 
-improve your standard linear model with a "generalised" linear model that can
-cope with these types of responses:
+you may be dealing with the numbers of seals in a breeding colony (whole numbers), percentage of macroaglae destroyed in storm (bounded 0 to 100) or dead/alive (categorical data). Thinking about your data type allows you to improve your standard linear model with a "generalised" linear model that can cope with these types of responses:
 
 * **Continuous data**
   * These could be positive or negative, and include decimal points, 2.45, 5.01,
@@ -57,22 +53,15 @@ When we move from a linear model to using a GLM, we will need to think about cha
 * Binomial distribution: **proportion** or a **binary categorical** response
 
 ### Generalised linear models
-These are an extension of the standard linear model that you have already used.
-They are called with the `glm()` function, and can handle Gaussian, Poisson and
-Binomial error distributions. Before we look in detail at how `glm()` work, we
-will refresh our memory on the Gaussian (normal) distribution, and introduce
-the Poisson and Binomial distributions using interactive controls.
+Generalised linear models are an extension of the standard linear model that you have already used. They are called with the `glm()` function, and can handle Gaussian, Poisson and Binomial error distributions. Before we look in detail at how `glm()` work, we will refresh our memory on the Gaussian (normal) distribution, and introduce the Poisson and Binomial distributions using interactive controls.
 
 Let’s have a quick look at all three distributions and hopefully this will become clearer.
 
 ## Normal distribution
 
-This statistical distribution is named after a 19th Century German mathematician,
-Friederick Gauss. There are two 'parameters' to a normal
-distribution, the mean and the standard deviation. Conveniently, 95% of the
-data will fall within + or - 1.96 (i.e. approximately 2) standard deviations.
+The normal distribution is a statistical distribution named after a 19th Century German mathematician, Friederick Gauss. There are two 'parameters' to a normal distribution, the mean and the standard deviation. Conveniently, 95% of the data will fall within + or - 1.96 (i.e. approximately 2) standard deviations.
 
-The interactive tool below will let you change the mean and the standard deviation so you can see how these two parameters alter the position along the x-axis and shape of the normal distribution alogn the x- and y-axes. The blue line represents a fitted curve over the histogram according to the Gaussian distribution which will help you visualise the bell-shape.
+The interactive tool below will let you change the mean and the standard deviation so you can see how these two parameters alter the position along the x-axis and shape of the normal distribution along the x- and y-axes. The blue line represents a fitted curve over the histogram according to the Gaussian distribution which will help you visualise the bell-shape.
 
 ```{r gaussian_distribution_ui, echo=FALSE}
     titlePanel("The normal (Gaussian) distribution")
@@ -114,7 +103,7 @@ You should have seen the following changes to the plot when you adjusted the mea
 
  
 ## Poisson distribution
-Often biologists and ecologists collect data in the form of counts e.g. the number of birds in wood, or number of bacterial colonies on a Petri dish. These numbers are whole numbers or integers and cannot be negative values or have decimal points. This means that our distribution cannot include numbers less than zero. The Poisson distribution allows us to model count data. It takes a parameter $\lambda$ (Greek letter lambda) which adjusts the shape of this distribution. Try mvoing the the interactive slider left and right to see what happens to the size and shape of the distribution:
+Often biologists and ecologists collect data in the form of counts e.g. the number of breeding wandering albatross or number of bacterial colonies on a Petri dish. These numbers are whole numbers or integers and cannot be negative values or have decimal points. This means that our distribution cannot include numbers less than zero. The Poisson distribution allows us to model count data. It takes a parameter $\lambda$ (Greek letter lambda) which adjusts the shape of this distribution. Try moving the interactive slider left and right to see what happens to the size and shape of the distribution:
 
 ```{r poisson_distribution_ui, echo=FALSE}
     titlePanel("The Poisson distribution for whole-number counts")
@@ -168,11 +157,6 @@ experiment where you have 25 replicates, in each of which you try and germinate
 10 seeds. The "size" of each replicate is 10, and you would have a count of
 the numbers of seeds germinated or failed in each replicate.
 
-Below, we have the simplest setup, 25 replicates, with each of size one (which
-produces a very simple plot). Adjust the size of each replicate, which is
-equivalent to the number of seeds per replicate in the example above, and the
-probability of success, equivalent to the probability of germination.
-
 In the interactive demonstration below, we have the simplest setup, 25 replicates, with each of size one (which produces a very simple plot). Before you adjust the sliders, the sample size is only 1 (e.g. one seed per) replicate, and the probability (of germination) is 0.5. Therefore roughly half of your 25 replicates will fall into the 0 (no germination) category, and half into the 1.0 (germination) category. Adjust the size of each replicate, which is equivalent to the number of seeds per replicate in this example, and the probability of success, equivalent to the probability of germination.
 
 ```{r binomial_distribution_ui, echo=FALSE}
@@ -215,6 +199,8 @@ see additional whole numbers appearing on the horizontal axis, representing
 the numbers of successes (e.g. germinating seeds)
 * the total of all the vertical axes is always 25, which is the total number
 of replicates in this example.
+
+The binomial distribution can be used to calculate probabilities for different numbers of successes out of _n_ trials, given the known probability of success for each trail.
 
 ## How to generalise
 ### How do generalised linear models extend the standard linear model?
@@ -262,14 +248,14 @@ where
 * $\sum$ = Greek letter Epsilon which indicates to go through each of the next
 calculations and add the results together
 * $\beta_jx_j$ = multiply parameter. e.g. in the simple regression example we only
-have two parameters ($p = 2$):  $\beta_0$ the intercept (which is multipled by
+have two parameters ($p = 2$):  $\beta_0$ the intercept (which is multiplied by
 1.0) and $\beta_1$ the slope, which is multiplied by the explanatory variable $x_1$.
 
 ### The need for a link function
-I mentioned in passing that we need to make our predictions and link them back
+It was mentioned in passing that we need to make our predictions and link them back
 to the explanatory variable. This is straightforward if we have a normal (Gaussian)
 distribution, but is complex for Binomial, Poisson and other distributions. 
-Therefore in a generalised linear model or GLM, we calculate an **intermediate**
+Therefore, in a generalised linear model or GLM, we calculate an **intermediate**
 value, which is then "linked" back to the response variable. We call this
 intermediate variable $\eta$ (Greek letter eta). So our equation now becomes:
 
@@ -288,11 +274,11 @@ Fortunately, R's `glm()` function automatically picks the correct transformation
 for the link function.
 
 ### Do I need to worry about this?
-On a day-to-day basis, no (which is why I have avoided too many equations)! But
+On a day-to-day basis, no (which is why there are not too many equations)! But
 it does have a few impacts that you should be alert to, that we will discuss as
 we work through examples:
 
-* Least squares no longer used. The method for estimating the parameters changes
+* Least squares is no longer used. The method for estimating the parameters changes
 from sums of squares etc. to a technique called 'maximum likelihood'. Instead of
 t-statistics for each parameter, you will see z-statistics displayed.
 * You will no longer see an R-squared value. Instead, something called the
@@ -317,7 +303,7 @@ invertebrates in rivers with different levels of pollution. Aquatic invertebrate
 can be very sensitive to water pollution, and are useful **bio-indicators** of
 pollution events etc.
 
-![](GLM_files/figure-html/river.jpg)
+![](www/river.jpg)
 
 An advanced system has now been developed by the Centre
 for Ecology and Hydrology that is used by the Envionment Agency to assess river
@@ -329,8 +315,8 @@ The data are in a data.frame called `sppcount`. Begin by creating a scatterplot
 of the data, run a linear model, examine its summary table, and look at the plots
 of residuals and QQ plot. **Hints:** Use `gf_point()` for the scatterplot, for
 the `lm()` make sure you have your response and explanatory variables the right
-way round. Use `mplot(spp_count_lm, which=1:2)` to check diagnostic the residuals
-and QQ plots with `ggplot2` graphs or `plot(spp_count_lm, which=1:2` for basic
+way round. Use `mplot(spp_count_lm, which=1:2)` to check the diagnostics for the residuals
+using `plot(spp_count_lm, which=1:2` for basic
 graphs.
 
 ```{r sppcount_lm, exercise=TRUE}
@@ -354,10 +340,10 @@ almost 80% of the variation. However, there are two clues that something is
 amiss:
 
 1. The QQ plot has a distinct S-shape to it
-2. What is the species count at high levels of pollution.
+2. What is the species count at high levels of pollution?
 
 We can check the latter by plotting the fitted line onto our scatterplot, and
-we can also calculate a predicted number of species for a given amount of water
+we can calculate a predicted number of species for a given amount of water
 pollution. As this is a **linear model** the line function does not do anything,
 so we can use the simple `predict()` function to obtain a predicted spp count.
 
@@ -376,7 +362,7 @@ gf_point(species ~ pollution, data = sppcount) %>%
   gf_lm()
 ```
 
-We have a problem. From roughly pollution=12.5 onwards we are getting **negative**
+We have a problem. From roughly pollution = 12.5 onwards we are getting **negative**
 numbers of species, which obviously cannot happen. To solve the problem, we'll
 repeat the analysis, but as a generalised linear model.
 
@@ -387,33 +373,52 @@ Now let's analyse these using GLM instead using the correct distribution and lin
 
 You can see an extra term in the model which is `family =`  that relates to the distribution we will be using and specifies the link function. Since we are using count data, the correct distribution we will need to use is the Poisson distribution and the link function will be log. Thinking about the linear model which you just created, simply replace your original `lm()` function with `glm()` and add `family = poisson(link = "log")`. Again display the model `summary()` and diagnostic plots via `plot()`.
 
-```{r sppcount_glm, exercise=TRUE}
+```{r sppcount_glm, exercise=TRUE, warning = FALSE}
 
 ```
 ```{r sppcount_glm-solution}
-# Create scatterplot
-gf_point(species ~ pollution, data=sppcount)
-
-# Create linear model, check coefficients and R-squared
+# Create linear model and check coefficients
 sppcount_glm <- glm(species~pollution, family = poisson(link = "log"), data=sppcount)
 summary(sppcount_glm)
 
-# Display first two diagnostic plots
-mplot(sppcount_glm, which=1:2)
 ```
 
-**Key points from output of `glm()` model**
+Let's go through the summary a bit more:
 
-* The summary table again shows pollution as significant. Instead of an R-squared
-value there is an AIC. When comparing models the lower the AIC the better.
-* The QQ plot has an S-shaped curve, but this is less than before: compare the
-range of values on the y-axis of the QQ plot for the `lm()` and `glm()`
+* you can see that both the intercept and the (gradient) for pollution are highly significant. **Remember that p < 0.05 tells us that variable is significant**. 
+* in the coefficients table we have z-values instead of t- or F-values. Linear models use a technique known as “least squares” to estimate parameters, whereas generalised linear models use a method called “maximum likelihood”, so the underlying mathematics differ.
+* we have a new terms called **null deviance** and **residual deviance**.
+* there is no r-squared. We'll come back to this in a minute.
+
+Null and residual deviance are terms related to variation in your data and explained by your model. You can think of null deviance as "measuring" all the variation in your data without any explanatory variables. The residual deviance is the variation left over after fitting the model using the explanatory variables. The smaller the residual deviance, the better.
+
+In the linear models, we used r-squared to explain the variation in the response variable  explained by our explanatory variable but in GLMs we cannot use r-squared. Instead, we can use the null and residual deviances to explain how much variation is explained by our explanatory variable(s) and calculate something referred to as a pseudo **r-squared**.
+
+$$variation\ explained = 100 *\frac{null\ deviance\ -\ residual\ deviance}{null\ deviance}$$
+
+In this case, we would have: 
+
+$$77.5 = 100 *\frac{71.426\ -\ 16.538}{71.426}$$
+
+So our explanatory variable, pollution, is explaining 77.5% variation in species richness. This is worth reporting in your results. 
+
+Let's have a look at the GLM diagnostics.
+
+```{r sppcount_diag-setup, echo = FALSE}
+sppcount_glm <- glm(species~pollution, family = poisson(link = "log"), data=sppcount)
+```
+
+```{r sppcount_diag, echo = TRUE}
+# Display first two diagnostic plots
+mplot(sppcount_glm, which = 1:2)
+```
+
+The QQ plot has an S-shaped curve, but this is less than before.
 
 ### Writing up the results
-The output from your summary is slightly different from `lm()`. To write the
-above model up I would write something similar to "There was a significant
+The output from your summary is slightly different from `lm()`. When you are writing your results up, it is best to write something similar to "There was a significant
 negative effect of pollution on species richness (AIC = 163.76, z = -7.165,
-p < 0.001)". Several schema are acceptable for reporting GLMs, but this is 
+p < 0.001)". It is important to state how much variation is explained as well when writing up your analysis. Several schema are acceptable for reporting GLMs, but this is 
 probably the most common.
 
 ```{r lm_v_glm, echo=FALSE}
@@ -443,7 +448,7 @@ You'll recall that GLMs use **link** functions to connect the response data to
 the explanatories, that account for the appropriate characteristics of the
 response data. Where the response data are continuous and `lm()` can be used,
 the link function does not do anything, hence it is known as the "identity".
-However, for Posson (and binomial) distributions, we need to take this into 
+However, for Poisson (and binomial) distributions, we need to take this into 
 account.
 
 Poisson (count) distributions use the log-link. We could therefore take the 
@@ -453,9 +458,8 @@ is the exponent. Hence $ln(x)$ is $e^x$. R has the function `exp()` to take the
 antilogarithm.
 
 However, this is a little complex to implement, so we are going to use a slightly
-easier method, based on the `mosaic` package. The `mosaic` package's default `plotModel()`
-function will allow you to see the GLM model and original points:
-
+easier method, based on the `mosaic` package. We will use `gf_smooth()` to add the predicted model curve, with arguments to explain that a GLM with Poisson distribution should
+be used.
 
 ```{r glm_plot_v2, echo=TRUE}
 sppcount_glm <- glm(species~pollution, family = "poisson", data=sppcount)
@@ -473,32 +477,21 @@ gf_point(species~pollution, data=sppcount) %>%
   gf_smooth(method="glm", method.args = list(family="poisson"), fullrange=TRUE, se=TRUE)
 ```
 
-The above code is a little more complex. We use `gf_smooth()` to add the predicted
-model curve, with arguments to explain that a GLM with Poisson distribution should
-be used. The `fullrange=TRUE` forces the fitted line to go beyond the range of the data.
+The above code is a little more complex. We `fullrange=TRUE` to line of code with the function `gf_smooth()`. This forces the fitted line to go beyond the range of the data.
 This **extrapolation** is **NOT** normally recommended (you can see the SE bars are
-bigger at the ends of the line). However, I have done it here just to demonstrate
-that the predicted number of species no longer drops to unrealistic negative values.
+bigger at the ends of the line). However, it demonstrates that the predicted number of species no longer drops to unrealistic negative values.
 
 ### Making a prediction for a specific value of water pollution
 Suppose you want to make a prediction of the expected number of species when
 the pollution is at 3.64 mg/l. This can be easily done by creating a **model function**
-from your `glm` using the `makeFun()` command, and then giving it a number:
-
-```{r make_glm_prediction, echo=TRUE}
-sppcount_glm <- glm(species~pollution, family = "poisson", data=sppcount)
-sppcount_fit <- makeFun(sppcount_glm)
-sppcount_fit(pollution = 3.64)
-```
-
-Don't worry that the predicted value includes decimal points; this is quite acceptable
+from your `glm` using the `makeFun()` command, and then giving it a number. Don't worry that the predicted value includes decimal points. This is quite acceptable
 in a GLM. It is how you set it up originally that matters. If you want, you can
 calculate the Standard Error (SE) of your predicted value:
 
-```{r make_glm_prediction_se, echo=TRUE}
+```{r make_glm_prediction, exercise=TRUE}
 sppcount_glm <- glm(species~pollution, family = "poisson", data=sppcount)
 sppcount_fit <- makeFun(sppcount_glm)
-sppcount_fit(pollution = 3.64, se.fit=TRUE)
+sppcount_fit(pollution = 3.64, se.fit= TRUE)
 ```
 
 ## GLM with binary data
@@ -513,7 +506,7 @@ Lichens are very sensitive to air pollution, and are another type of bioindicato
 The presence or absence of lichens on trees is a good indication of the amount of
 atmospheric pollution.
 
-![](GLM_files/figure-html/lichen.jpeg)
+![](www/lichen.jpeg)
 
 However, their incidence is also affected by the pH of the bark of the tree on
 which they might grow. Therefore this dataset includes not only the amount of air
@@ -633,27 +626,6 @@ and look at the summary:
 lichen_glm2 <- glm(lichen ~ calcium + airpoll, family=binomial(link = "logit"), data=lichens_dat)
 summary(lichen_glm2)
 ```
-
-We can compare two GLM models using the `anova()` function, with the option that
-the `test="Chi"`. This does what is known as a likelihood-ratio test. If there
-is no significant difference in the models, you go for the one with the lower
-AIC.
-
-```{r compare_lichens-setup}
-lichen_glm1 <- glm(lichen ~ calcium * airpoll, family=binomial, data=lichens_dat)
-lichen_glm2 <- glm(lichen ~ calcium + airpoll, family=binomial, data=lichens_dat)
-```
-
-```{r compare_lichens, exercise=TRUE}
-
-```
-```{r compare_lichens-solution}
-anova(lichen_glm1, lichen_glm2, test="Chi")
-```
-
-You can see that there is no statistical difference in the p-value for the 
-comparison of the two models. You should select the **simpler model**, which
-does not have the interaction term.
 
 ### Predicted values
 The coefficient estimates shown in the `summary(lichen_glm2)` table are in

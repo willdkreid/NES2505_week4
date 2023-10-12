@@ -16,22 +16,23 @@ Generalised linear models (GLMs) are, as their name suggests, an extension of th
 
 If you use a conventional linear model with these types of data, when you check the model assumptions, especially via a QQ plot, you may observe distortions, suggesting the linear model is not valid. You can sometimes transform your data before analysis by a linear model, for example take the `log(number_of_birds + 1)` as a response variable (we include the `+ 1` as it is not possible to take a logarithm of zero). However, it is usually better to use a generalised linear model from the outset.
 
-A linear model works best with normal (Gaussian) data, but a GLM can be extended to a wide range of data types, including all four described above. To remind yourself of the underlying theory of GLMs go to [This Interactive Website](https://naturalandenvironmentalscience.shinyapps.io/generalised_linear_models/) and we will begin by using some of the examples from that website.
+A linear model works best with normal (Gaussian) data, but a GLM can be extended to a wide range of data types, including all four described above. To remind yourself of the underlying theory of GLMs go to [This Interactive Website]() and we will begin by using some of the examples from that website.
 
 The overall aim of this practical is to help you have a better understanding of GLMs, how to set them up in R/RStudio, and learn how to interpret their outputs. Specific objectives of Practical 4 are:
 
 1. Use of GLMs with counts (whole number response data)
 2. Use of GLMs with binary responses (presence / absence, dead / alive etc.)
-3. Explore these concepts with new datasets
-4. Consider lognormal response data (response positive numbers, e.g. weight, height)
+3. Interpret the outputs of GLM models
+
+
 
 ## Setting up for the practical  
 
 First, go to Canvas and download the **lichen.csv**,  **sppcount.csv** and **beetle.csv** data sets and save them to your **Data** folder in the **NES2303** folder where you have your R project stored.  
 
-Second, start RStudio, and click on **File -> Recent Projects** and select the NES2303 project.
+Second, start RStudio, and click on **File -> Recent Projects** and select the NES2505 project.
 
-Finally, create a new R script by clicking on **File -> New File -> R Script**. Save this file into your NES2303 folder, calling it _**Practical_4.R**_.
+Finally, create a new R script by clicking on **File -> New File -> R Script**. Save this file into your NES2505 folder, calling it _**Practical_4.R**_.
 
 ## Initial lines in your script
 
@@ -50,8 +51,8 @@ library(car)
 Now load in the two .csv files you downloaded from  Canvas. `lichen.csv` and `sppcount.csv` at the very beginning of the practical. **Note**: Remember to move the two files into your **`Data`** folder before using `read.csv()` to import them into R.
 
 ```{r echo=TRUE,  message=FALSE, warning=FALSE}
-lichen_dat <- read.csv("Data/lichen.csv")
 sppcount_dat <- read.csv("Data/sppcount.csv")
+lichen_dat <- read.csv("Data/lichen.csv")
 beetle_dat <- read.csv("Data/beetle.csv")
 ```
 
@@ -61,7 +62,7 @@ beetle_dat <- read.csv("Data/beetle.csv")
 Aquatic invertebrates provide very useful bioindicators of river systems. A pollution event might be short-lived, and pollutants in the water only detectable for a few days after a spillage. However the effects on the aquatic invertebrates can be detectable for days, weeks or months. They are used by the UK's Environment Agency, Defra, Scottish, Welsh and NI governments to assess aquatic pollution through a system known as RIVPACS [see their website here for more details](https://www.ceh.ac.uk/services/rivpacs-reference-database).
 
 ## 1.2 Summary Statistics and visualisation of aquatic invertebrate data
-It is always good to start by observing the data and running some summary statistics. The data are are two columns of data, recording both the numbers of aquatic invertebrate species, and the water pollution levels, at 30 rivers.
+It is always good to start by observing the data and running some summary statistics. We are going to start by looking at the `sppcount_dat` data set. The data are are two columns of data, recording the numbers of aquatic invertebrate species in the first column, and the water pollution levels, at 30 rivers, in the second.
 
 ```{r echo=TRUE, include=TRUE}
 # Check the top of your data, and overall summary
@@ -72,16 +73,7 @@ str(sppcount_dat)
 
 After looking at the data, what do you think is the response and what is the explanatory variable? **Hint**: think about "cause" and "effect". When plotting your data, what would go on your x-axis, and which variable on your y-axis. Notice also that the `str()` function which returns the "structure" of the data, records `pollution` as numeric (`num`) and species as integer (`int`). An integer is a whole number, i.e. 6, 8, 12 with no decimal points.
 
-```{r}
-mean(~pollution, data=sppcount_dat) # Overall average pollution
-mean(~species, data=sppcount_dat)   # Overall average number of species at all the rivers
-sd(~species, data = sppcount_dat)   # Overall standard deviation of the species number
-sd(~pollution, data = sppcount_dat) # Overall standard deviation of the pollution
-```
-
-Notice that in the above commands we are calculating the overall mean and sd for species count and pollution. Thus the format of the call can be `mean(~pollution, data=sppcount_dat)`. Why might `mean(species ~ pollution, data=sppcount_dat)` **not** be appropriate to work out the average number of species at each pollution level? **Hint:** Is pollution a continuous or categorical explanatory variable? Try the command and see what you get.
-
-Now let's visualise the data. Recall your graph-plotting skills from the previous practicals, and try and create a scatter plot similar to the following:
+Let's visualise the data. Recall your graph-plotting skills from the previous practicals, and try and create a scatter plot similar to the following:
 
 **Hints**
 
@@ -102,7 +94,9 @@ gf_point(species~pollution, data = sppcount_dat) %>%
 
 ```
 
-The plot above shows a clear link between the total number of aquatic invertebrate species and the amount of pollution present in the water. Visualisation is insufficient to test our (null) hypothesis that there about relationships between pollution and number of species. We need a formal statistical model. We will begin by doing it the "wrong" way with a linear model, and diagnose what is incorrect. **Note**: Look carrefully at the graph you have just created, and you might already be able to detect a potential problem. What is it?
+The plot above shows a clear link between the total number of aquatic invertebrate species and the amount of pollution present in the water. It looks like there is a decrease in species with increasing pollution. How would you state a null and alternate hypotheses? 
+
+Plotting these data is not enough to say that pollution is having a negative effect on the number of species in the river. We need a formal statistical model to test this. We will begin by doing it the "wrong" way with a linear model, and diagnose what is incorrect. **Note**: Look carefully at the graph you have just created, and you might already be able to detect a potential problem. What is it?
 
 ## 1.3 Incorrect analysis via linear model
 For the linear model we simply set our count of the number of species as the response, and pollution level as the explanatory in the usual way. Go ahead and store the results of your `lm()` call in an R object called `sppcount_lm`, and produce a summary of the results. Check that you get the following:

@@ -1,0 +1,13 @@
+name: NES2505GLM
+title: NES2505GLM
+username: naturalandenvironmentalscience
+account: naturalandenvironmentalscience
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 10172449
+bundleId: 7795491
+url: https://naturalandenvironmentalscience.shinyapps.io/NES2505GLM/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: GLM.html|NES2505_GLM.html|NES2505_Practical4_schedule.Rmd|Practical4_schedule.html|README.md

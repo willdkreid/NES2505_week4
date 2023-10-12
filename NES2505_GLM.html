@@ -114,17 +114,18 @@ if (window.hljs) {
 <div id="section-linear-models" class="section level3">
 <h3>Linear models</h3>
 <p>In the last two weeks, we have been looking at linear models using
-<code>lm()</code>. The response data you’ve looked at has been
-continuous numerical data, potentially with decimal points.</p>
+<code>lm()</code>. The response data you’ve looked at has been numerical
+continuous data, potentially with decimal points.</p>
 </div>
 <div id="section-data-types" class="section level3">
 <h3>Data types</h3>
 <p>Your response variable may not always be a continuous numerical one.
-In biology you may be dealing with the numbers of birds in a wood (whole
-numbers), percentage of crop damage by a pathogen (bounded 0 to 100) or
-dead/alive (categorical data). Thinking about your data type allows you
-to improve your standard linear model with a “generalised” linear model
-that can cope with these types of responses:</p>
+In biology you may be dealing with the numbers of seals in a breeding
+colony (whole numbers), percentage of macroaglae destroyed in storm
+(bounded 0 to 100) or dead/alive (categorical data). Thinking about your
+data type allows you to improve your standard linear model with a
+“generalised” linear model that can cope with these types of
+responses:</p>
 <ul>
 <li><strong>Continuous data</strong>
 <ul>
@@ -188,26 +189,27 @@ response</li>
 </div>
 <div id="section-generalised-linear-models" class="section level3">
 <h3>Generalised linear models</h3>
-<p>These are an extension of the standard linear model that you have
-already used. They are called with the <code>glm()</code> function, and
-can handle Gaussian, Poisson and Binomial error distributions. Before we
-look in detail at how <code>glm()</code> work, we will refresh our
-memory on the Gaussian (normal) distribution, and introduce the Poisson
-and Binomial distributions using interactive controls.</p>
+<p>Generalised linear models are an extension of the standard linear
+model that you have already used. They are called with the
+<code>glm()</code> function, and can handle Gaussian, Poisson and
+Binomial error distributions. Before we look in detail at how
+<code>glm()</code> work, we will refresh our memory on the Gaussian
+(normal) distribution, and introduce the Poisson and Binomial
+distributions using interactive controls.</p>
 <p>Let’s have a quick look at all three distributions and hopefully this
 will become clearer.</p>
 </div>
 </div>
 <div id="section-normal-distribution" class="section level2">
 <h2>Normal distribution</h2>
-<p>This statistical distribution is named after a 19th Century German
-mathematician, Friederick Gauss. There are two ‘parameters’ to a normal
-distribution, the mean and the standard deviation. Conveniently, 95% of
-the data will fall within + or - 1.96 (i.e. approximately 2) standard
-deviations.</p>
+<p>The normal distribution is a statistical distribution named after a
+19th Century German mathematician, Friederick Gauss. There are two
+‘parameters’ to a normal distribution, the mean and the standard
+deviation. Conveniently, 95% of the data will fall within + or - 1.96
+(i.e. approximately 2) standard deviations.</p>
 <p>The interactive tool below will let you change the mean and the
 standard deviation so you can see how these two parameters alter the
-position along the x-axis and shape of the normal distribution alogn the
+position along the x-axis and shape of the normal distribution along the
 x- and y-axes. The blue line represents a fitted curve over the
 histogram according to the Gaussian distribution which will help you
 visualise the bell-shape.</p>
@@ -241,13 +243,13 @@ while a high standard deviation flattens and spreads the curve</li>
 <div id="section-poisson-distribution" class="section level2">
 <h2>Poisson distribution</h2>
 <p>Often biologists and ecologists collect data in the form of counts
-e.g. the number of birds in wood, or number of bacterial colonies on a
-Petri dish. These numbers are whole numbers or integers and cannot be
-negative values or have decimal points. This means that our distribution
-cannot include numbers less than zero. The Poisson distribution allows
-us to model count data. It takes a parameter <span
+e.g. the number of breeding wandering albatross or number of bacterial
+colonies on a Petri dish. These numbers are whole numbers or integers
+and cannot be negative values or have decimal points. This means that
+our distribution cannot include numbers less than zero. The Poisson
+distribution allows us to model count data. It takes a parameter <span
 class="math inline">\(\lambda\)</span> (Greek letter lambda) which
-adjusts the shape of this distribution. Try mvoing the the interactive
+adjusts the shape of this distribution. Try moving the interactive
 slider left and right to see what happens to the size and shape of the
 distribution:</p>
 <h2>The Poisson distribution for whole-number counts</h2>
@@ -294,11 +296,6 @@ You might do an experiment where you have 25 replicates, in each of
 which you try and germinate 10 seeds. The “size” of each replicate is
 10, and you would have a count of the numbers of seeds germinated or
 failed in each replicate.</p>
-<p>Below, we have the simplest setup, 25 replicates, with each of size
-one (which produces a very simple plot). Adjust the size of each
-replicate, which is equivalent to the number of seeds per replicate in
-the example above, and the probability of success, equivalent to the
-probability of germination.</p>
 <p>In the interactive demonstration below, we have the simplest setup,
 25 replicates, with each of size one (which produces a very simple
 plot). Before you adjust the sliders, the sample size is only 1
@@ -334,6 +331,9 @@ representing the numbers of successes (e.g. germinating seeds)</li>
 <li>the total of all the vertical axes is always 25, which is the total
 number of replicates in this example.</li>
 </ul>
+<p>The binomial distribution can be used to calculate probabilities for
+different numbers of successes out of <em>n</em> trials, given the known
+probability of success for each trail.</p>
 </div>
 <div id="section-how-to-generalise" class="section level2">
 <h2>How to generalise</h2>
@@ -396,22 +396,22 @@ results together</li>
 <li><span class="math inline">\(\beta_jx_j\)</span> = multiply
 parameter. e.g. in the simple regression example we only have two
 parameters (<span class="math inline">\(p = 2\)</span>): <span
-class="math inline">\(\beta_0\)</span> the intercept (which is multipled
-by 1.0) and <span class="math inline">\(\beta_1\)</span> the slope,
-which is multiplied by the explanatory variable <span
+class="math inline">\(\beta_0\)</span> the intercept (which is
+multiplied by 1.0) and <span class="math inline">\(\beta_1\)</span> the
+slope, which is multiplied by the explanatory variable <span
 class="math inline">\(x_1\)</span>.</li>
 </ul>
 </div>
 <div id="section-the-need-for-a-link-function" class="section level3">
 <h3>The need for a link function</h3>
-<p>I mentioned in passing that we need to make our predictions and link
-them back to the explanatory variable. This is straightforward if we
-have a normal (Gaussian) distribution, but is complex for Binomial,
-Poisson and other distributions. Therefore in a generalised linear model
-or GLM, we calculate an <strong>intermediate</strong> value, which is
-then “linked” back to the response variable. We call this intermediate
-variable <span class="math inline">\(\eta\)</span> (Greek letter eta).
-So our equation now becomes:</p>
+<p>It was mentioned in passing that we need to make our predictions and
+link them back to the explanatory variable. This is straightforward if
+we have a normal (Gaussian) distribution, but is complex for Binomial,
+Poisson and other distributions. Therefore, in a generalised linear
+model or GLM, we calculate an <strong>intermediate</strong> value, which
+is then “linked” back to the response variable. We call this
+intermediate variable <span class="math inline">\(\eta\)</span> (Greek
+letter eta). So our equation now becomes:</p>
 <p><span class="math display">\[\eta = \sum_{j=1}^{p} \beta_jx_j +
 \epsilon\]</span></p>
 </div>
@@ -439,11 +439,11 @@ correct transformation for the link function.</p>
 </div>
 <div id="section-do-i-need-to-worry-about-this" class="section level3">
 <h3>Do I need to worry about this?</h3>
-<p>On a day-to-day basis, no (which is why I have avoided too many
+<p>On a day-to-day basis, no (which is why there are not too many
 equations)! But it does have a few impacts that you should be alert to,
 that we will discuss as we work through examples:</p>
 <ul>
-<li>Least squares no longer used. The method for estimating the
+<li>Least squares is no longer used. The method for estimating the
 parameters changes from sums of squares etc. to a technique called
 ‘maximum likelihood’. Instead of t-statistics for each parameter, you
 will see z-statistics displayed.</li>
@@ -479,7 +479,7 @@ Started with R: introduction for biologists</a> Chapter 7.</p>
 of aquatic invertebrates in rivers with different levels of pollution.
 Aquatic invertebrates can be very sensitive to water pollution, and are
 useful <strong>bio-indicators</strong> of pollution events etc.</p>
-<p><img src="GLM_files/figure-html/river.jpg" /></p>
+<p><img src="www/river.jpg" /></p>
 <p>An advanced system has now been developed by the Centre for Ecology
 and Hydrology that is used by the Envionment Agency to assess river
 quality, called
@@ -492,9 +492,9 @@ summary table, and look at the plots of residuals and QQ plot.
 <strong>Hints:</strong> Use <code>gf_point()</code> for the scatterplot,
 for the <code>lm()</code> make sure you have your response and
 explanatory variables the right way round. Use
-<code>mplot(spp_count_lm, which=1:2)</code> to check diagnostic the
-residuals and QQ plots with <code>ggplot2</code> graphs or
-<code>plot(spp_count_lm, which=1:2</code> for basic graphs.</p>
+<code>mplot(spp_count_lm, which=1:2)</code> to check the diagnostics for
+the residuals using <code>plot(spp_count_lm, which=1:2</code> for basic
+graphs.</p>
 <div class="tutorial-exercise" data-label="sppcount_lm"
 data-completion="1" data-diagnostics="1" data-startover="1"
 data-lines="0">
@@ -519,11 +519,11 @@ the model explains almost 80% of the variation. However, there are two
 clues that something is amiss:</p>
 <ol style="list-style-type: decimal">
 <li>The QQ plot has a distinct S-shape to it</li>
-<li>What is the species count at high levels of pollution.</li>
+<li>What is the species count at high levels of pollution?</li>
 </ol>
 <p>We can check the latter by plotting the fitted line onto our
-scatterplot, and we can also calculate a predicted number of species for
-a given amount of water pollution. As this is a <strong>linear
+scatterplot, and we can calculate a predicted number of species for a
+given amount of water pollution. As this is a <strong>linear
 model</strong> the line function does not do anything, so we can use the
 simple <code>predict()</code> function to obtain a predicted spp
 count.</p>
@@ -544,9 +544,9 @@ data-diagnostics="1" data-startover="1" data-lines="0">
   gf_lims(x = c(0, 15)) %&gt;% 
   gf_lm()</code></pre>
 </div>
-<p>We have a problem. From roughly pollution=12.5 onwards we are getting
-<strong>negative</strong> numbers of species, which obviously cannot
-happen. To solve the problem, we’ll repeat the analysis, but as a
+<p>We have a problem. From roughly pollution = 12.5 onwards we are
+getting <strong>negative</strong> numbers of species, which obviously
+cannot happen. To solve the problem, we’ll repeat the analysis, but as a
 generalised linear model.</p>
 </div>
 <div id="section-correct-analysis-with-glm-function"
@@ -577,35 +577,62 @@ data-lines="0">
 <div class="tutorial-exercise-support"
 data-label="sppcount_glm-solution" data-completion="1"
 data-diagnostics="1" data-startover="1" data-lines="0">
-<pre class="text"><code># Create scatterplot
-gf_point(species ~ pollution, data=sppcount)
-
-# Create linear model, check coefficients and R-squared
+<pre class="text"><code># Create linear model and check coefficients
 sppcount_glm &lt;- glm(species~pollution, family = poisson(link = &quot;log&quot;), data=sppcount)
-summary(sppcount_glm)
-
-# Display first two diagnostic plots
-mplot(sppcount_glm, which=1:2)</code></pre>
+summary(sppcount_glm)</code></pre>
 </div>
-<p><strong>Key points from output of <code>glm()</code>
-model</strong></p>
+<p>Let’s go through the summary a bit more:</p>
 <ul>
-<li>The summary table again shows pollution as significant. Instead of
-an R-squared value there is an AIC. When comparing models the lower the
-AIC the better.</li>
-<li>The QQ plot has an S-shaped curve, but this is less than before:
-compare the range of values on the y-axis of the QQ plot for the
-<code>lm()</code> and <code>glm()</code></li>
+<li>you can see that both the intercept and the (gradient) for pollution
+are highly significant. <strong>Remember that p &lt; 0.05 tells us that
+variable is significant</strong>.</li>
+<li>in the coefficients table we have z-values instead of t- or
+F-values. Linear models use a technique known as “least squares” to
+estimate parameters, whereas generalised linear models use a method
+called “maximum likelihood”, so the underlying mathematics differ.</li>
+<li>we have a new terms called <strong>null deviance</strong> and
+<strong>residual deviance</strong>.</li>
+<li>there is no r-squared. We’ll come back to this in a minute.</li>
 </ul>
+<p>Null and residual deviance are terms related to variation in your
+data and explained by your model. You can think of null deviance as
+“measuring” all the variation in your data without any explanatory
+variables. The residual deviance is the variation left over after
+fitting the model using the explanatory variables. The smaller the
+residual deviance, the better.</p>
+<p>In the linear models, we used r-squared to explain the variation in
+the response variable explained by our explanatory variable but in GLMs
+we cannot use r-squared. Instead, we can use the null and residual
+deviances to explain how much variation is explained by our explanatory
+variable(s) and calculate something referred to as a pseudo
+<strong>r-squared</strong>.</p>
+<p><span class="math display">\[variation\ explained = 100 *\frac{null\
+deviance\ -\ residual\ deviance}{null\ deviance}\]</span></p>
+<p>In this case, we would have:</p>
+<p><span class="math display">\[77.5 = 100 *\frac{71.426\ -\
+16.538}{71.426}\]</span></p>
+<p>So our explanatory variable, pollution, is explaining 77.5% variation
+in species richness. This is worth reporting in your results.</p>
+<p>Let’s have a look at the GLM diagnostics.</p>
+<pre class="r"><code># Display first two diagnostic plots
+mplot(sppcount_glm, which = 1:2)</code></pre>
+<pre><code>## [[1]]</code></pre>
+<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="NES2505_GLM_files/figure-html/sppcount_diag-1.png" width="624" /></p>
+<pre><code>## 
+## [[2]]</code></pre>
+<p><img src="NES2505_GLM_files/figure-html/sppcount_diag-2.png" width="624" /></p>
+<p>The QQ plot has an S-shaped curve, but this is less than before.</p>
 </div>
 <div id="section-writing-up-the-results" class="section level3">
 <h3>Writing up the results</h3>
 <p>The output from your summary is slightly different from
-<code>lm()</code>. To write the above model up I would write something
-similar to “There was a significant negative effect of pollution on
-species richness (AIC = 163.76, z = -7.165, p &lt; 0.001)”. Several
-schema are acceptable for reporting GLMs, but this is probably the most
-common.</p>
+<code>lm()</code>. When you are writing your results up, it is best to
+write something similar to “There was a significant negative effect of
+pollution on species richness (AIC = 163.76, z = -7.165, p &lt; 0.001)”.
+It is important to state how much variation is explained as well when
+writing up your analysis. Several schema are acceptable for reporting
+GLMs, but this is probably the most common.</p>
 <div class="panel panel-default tutorial-question-container">
 <div data-label="lm_v_glm" class="tutorial-question panel-body">
 <div id="lm_v_glm-answer_container" class="shiny-html-output"></div>
@@ -622,7 +649,7 @@ connect the response data to the explanatories, that account for the
 appropriate characteristics of the response data. Where the response
 data are continuous and <code>lm()</code> can be used, the link function
 does not do anything, hence it is known as the “identity”. However, for
-Posson (and binomial) distributions, we need to take this into
+Poisson (and binomial) distributions, we need to take this into
 account.</p>
 <p>Poisson (count) distributions use the log-link. We could therefore
 take the antilog of our predictions to get back to the values for our
@@ -634,8 +661,9 @@ class="math inline">\(e^x\)</span>. R has the function
 <code>exp()</code> to take the antilogarithm.</p>
 <p>However, this is a little complex to implement, so we are going to
 use a slightly easier method, based on the <code>mosaic</code> package.
-The <code>mosaic</code> package’s default <code>plotModel()</code>
-function will allow you to see the GLM model and original points:</p>
+We will use <code>gf_smooth()</code> to add the predicted model curve,
+with arguments to explain that a GLM with Poisson distribution should be
+used.</p>
 <pre class="r"><code>sppcount_glm &lt;- glm(species~pollution, family = &quot;poisson&quot;, data=sppcount)
 gf_point(species~pollution, data=sppcount) %&gt;% 
   gf_smooth(method = &quot;glm&quot;, method.args = list(family=&quot;poisson&quot;), se=TRUE)</code></pre>
@@ -647,15 +675,14 @@ recall gave <strong>negative</strong> species counts with the
   gf_lims(x = c(0, 15)) %&gt;% 
   gf_smooth(method=&quot;glm&quot;, method.args = list(family=&quot;poisson&quot;), fullrange=TRUE, se=TRUE)</code></pre>
 <p><img src="NES2505_GLM_files/figure-html/glm_plot_extended-1.png" width="624" /></p>
-<p>The above code is a little more complex. We use
-<code>gf_smooth()</code> to add the predicted model curve, with
-arguments to explain that a GLM with Poisson distribution should be
-used. The <code>fullrange=TRUE</code> forces the fitted line to go
-beyond the range of the data. This <strong>extrapolation</strong> is
+<p>The above code is a little more complex. We
+<code>fullrange=TRUE</code> to line of code with the function
+<code>gf_smooth()</code>. This forces the fitted line to go beyond the
+range of the data. This <strong>extrapolation</strong> is
 <strong>NOT</strong> normally recommended (you can see the SE bars are
-bigger at the ends of the line). However, I have done it here just to
-demonstrate that the predicted number of species no longer drops to
-unrealistic negative values.</p>
+bigger at the ends of the line). However, it demonstrates that the
+predicted number of species no longer drops to unrealistic negative
+values.</p>
 </div>
 <div
 id="section-making-a-prediction-for-a-specific-value-of-water-pollution"
@@ -664,30 +691,19 @@ class="section level3">
 <p>Suppose you want to make a prediction of the expected number of
 species when the pollution is at 3.64 mg/l. This can be easily done by
 creating a <strong>model function</strong> from your <code>glm</code>
-using the <code>makeFun()</code> command, and then giving it a
-number:</p>
-<pre class="r"><code>sppcount_glm &lt;- glm(species~pollution, family = &quot;poisson&quot;, data=sppcount)
-sppcount_fit &lt;- makeFun(sppcount_glm)
-sppcount_fit(pollution = 3.64)</code></pre>
-<pre><code>##        1 
-## 18.73928</code></pre>
-<p>Don’t worry that the predicted value includes decimal points; this is
+using the <code>makeFun()</code> command, and then giving it a number.
+Don’t worry that the predicted value includes decimal points. This is
 quite acceptable in a GLM. It is how you set it up originally that
 matters. If you want, you can calculate the Standard Error (SE) of your
 predicted value:</p>
-<pre class="r"><code>sppcount_glm &lt;- glm(species~pollution, family = &quot;poisson&quot;, data=sppcount)
+<div class="tutorial-exercise" data-label="make_glm_prediction"
+data-completion="1" data-diagnostics="1" data-startover="1"
+data-lines="0">
+<pre class="text"><code>sppcount_glm &lt;- glm(species~pollution, family = &quot;poisson&quot;, data=sppcount)
 sppcount_fit &lt;- makeFun(sppcount_glm)
-sppcount_fit(pollution = 3.64, se.fit=TRUE)</code></pre>
-<pre><code>## $fit
-##        1 
-## 18.73928 
-## 
-## $se.fit
-##         1 
-## 0.8181217 
-## 
-## $residual.scale
-## [1] 1</code></pre>
+sppcount_fit(pollution = 3.64, se.fit= TRUE)</code></pre>
+<script type="application/json" data-ui-opts="1">{"engine":"r","has_checker":false,"caption":"<span data-i18n=\"text.enginecap\" data-i18n-opts=\"{&quot;engine&quot;:&quot;R&quot;}\">R Code<\/span>"}</script>
+</div>
 </div>
 </div>
 <div id="section-glm-with-binary-data" class="section level2">
@@ -704,7 +720,7 @@ line.</p>
 <p>Lichens are very sensitive to air pollution, and are another type of
 bioindicator. The presence or absence of lichens on trees is a good
 indication of the amount of atmospheric pollution.</p>
-<p><img src="GLM_files/figure-html/lichen.jpeg" /></p>
+<p><img src="www/lichen.jpeg" /></p>
 <p>However, their incidence is also affected by the pH of the bark of
 the tree on which they might grow. Therefore this dataset includes not
 only the amount of air pollution, but also the calcium content in the
@@ -835,24 +851,6 @@ data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>lichen_glm2 &lt;- glm(lichen ~ calcium + airpoll, family=binomial(link = &quot;logit&quot;), data=lichens_dat)
 summary(lichen_glm2)</code></pre>
 </div>
-<p>We can compare two GLM models using the <code>anova()</code>
-function, with the option that the <code>test="Chi"</code>. This does
-what is known as a likelihood-ratio test. If there is no significant
-difference in the models, you go for the one with the lower AIC.</p>
-<div class="tutorial-exercise" data-label="compare_lichens"
-data-completion="1" data-diagnostics="1" data-startover="1"
-data-lines="0">
-<script type="application/json" data-ui-opts="1">{"engine":"r","has_checker":false,"caption":"<span data-i18n=\"text.enginecap\" data-i18n-opts=\"{&quot;engine&quot;:&quot;R&quot;}\">R Code<\/span>"}</script>
-</div>
-<div class="tutorial-exercise-support"
-data-label="compare_lichens-solution" data-completion="1"
-data-diagnostics="1" data-startover="1" data-lines="0">
-<pre class="text"><code>anova(lichen_glm1, lichen_glm2, test=&quot;Chi&quot;)</code></pre>
-</div>
-<p>You can see that there is no statistical difference in the p-value
-for the comparison of the two models. You should select the
-<strong>simpler model</strong>, which does not have the interaction
-term.</p>
 </div>
 <div id="section-predicted-values" class="section level3">
 <h3>Predicted values</h3>
@@ -1089,12 +1087,11 @@ learnr:::store_exercise_cache(structure(list(label = "sppcount_glm", global_setu
 "lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
 ), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
     chunks = list(list(label = "sppcount_glm", code = "", opts = list(
-        label = "\"sppcount_glm\"", exercise = "TRUE"), engine = "r")), 
-    code_check = NULL, error_check = NULL, check = NULL, solution = structure(c("# Create scatterplot", 
-    "gf_point(species ~ pollution, data=sppcount)", "", "# Create linear model, check coefficients and R-squared", 
+        label = "\"sppcount_glm\"", exercise = "TRUE", warning = "FALSE"), 
+        engine = "r")), code_check = NULL, error_check = NULL, 
+    check = NULL, solution = structure(c("# Create linear model and check coefficients", 
     "sppcount_glm <- glm(species~pollution, family = poisson(link = \"log\"), data=sppcount)", 
-    "summary(sppcount_glm)", "", "# Display first two diagnostic plots", 
-    "mplot(sppcount_glm, which=1:2)"), chunk_opts = list(label = "sppcount_glm-solution")), 
+    "summary(sppcount_glm)", ""), chunk_opts = list(label = "sppcount_glm-solution")), 
     tests = NULL, options = list(eval = FALSE, echo = TRUE, results = "markup", 
         tidy = FALSE, tidy.opts = NULL, collapse = FALSE, prompt = FALSE, 
         comment = NA, highlight = FALSE, size = "normalsize", 
@@ -1108,11 +1105,11 @@ learnr:::store_exercise_cache(structure(list(label = "sppcount_glm", global_setu
         fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
         fig.pos = "", out.width = 624, out.height = NULL, out.extra = NULL, 
         fig.retina = 2, external = TRUE, sanitize = FALSE, interval = 1, 
-        aniopts = "controls,loop", warning = TRUE, error = FALSE, 
+        aniopts = "controls,loop", warning = FALSE, error = FALSE, 
         message = TRUE, render = NULL, ref.label = NULL, child = NULL, 
         engine = "r", split = FALSE, include = TRUE, purl = TRUE, 
         max.print = 1000, label = "sppcount_glm", exercise = TRUE, 
-        code = "", out.width.px = 624, out.height.px = 384, params.src = "sppcount_glm, exercise=TRUE", 
+        code = "", out.width.px = 624, out.height.px = 384, params.src = "sppcount_glm, exercise=TRUE, warning = FALSE", 
         fig.num = 0L, exercise.df_print = "paged", exercise.checker = "NULL"), 
     engine = "r", version = "4"), class = c("r", "tutorial_exercise"
 )))
@@ -1121,25 +1118,25 @@ learnr:::store_exercise_cache(structure(list(label = "sppcount_glm", global_setu
 
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "lm_v_glm", question = structure("What happens if I run glm() without specifying the family?", html = TRUE, class = c("html", 
-"character")), answers = list(structure(list(id = "lnr_ans_a7e381f", 
+"character")), answers = list(structure(list(id = "lnr_ans_8dbe9d9", 
     option = "It uses a normal distribution estimated by least squares", 
     value = "It uses a normal distribution estimated by least squares", 
     label = structure("It uses a normal distribution estimated by least squares", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. It uses a normal (Gaussian) distribution, but\nestimates by maximum likelihood. The coefficients for the\nintercept and gradient will be the same, but AIC and deviance\nwill show.", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_6850786", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_15810ee", 
     option = "It uses a binomial distribution estimated by maximum likelihood", 
     value = "It uses a binomial distribution estimated by maximum likelihood", 
     label = structure("It uses a binomial distribution estimated by maximum likelihood", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. It defaults to a normal (Gaussian) distribution, but\nestimates by maximum likelihood.", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_386614a", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_cbae10d", 
     option = "It uses a Poisson distribution estimated by maximum likelihood", 
     value = "It uses a Poisson distribution estimated by maximum likelihood", 
     label = structure("It uses a Poisson distribution estimated by maximum likelihood", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. It defaults to a normal (Gaussian) distribution, but\nestimates by maximum likelihood.", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_59f9c5e", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_4bd1df0", 
     option = "It uses a Gaussian distribution estimated by maximum likelihood", 
     value = "It uses a Gaussian distribution estimated by maximum likelihood", 
     label = structure("It uses a Gaussian distribution estimated by maximum likelihood", html = TRUE, class = c("html", 
@@ -1152,32 +1149,73 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
 "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", 
 "character")), message = NULL, post_message = NULL), ids = list(
     answer = "lm_v_glm-answer", question = "lm_v_glm"), loading = NULL, 
-    random_answer_order = TRUE, allow_retry = TRUE, seed = 1952573735.09076, 
+    random_answer_order = TRUE, allow_retry = TRUE, seed = 1333113217.87922, 
     options = list()), class = c("learnr_radio", "tutorial_question"
 )), session = session)
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-make_glm_prediction-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-make_glm_prediction-code-editor`)), session)
+output$`tutorial-exercise-make_glm_prediction-output` <- renderUI({
+  `tutorial-exercise-make_glm_prediction-result`()
+})
+</script>
+
+
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_cache(structure(list(label = "make_glm_prediction", global_setup = structure(c("library(learnr)", 
+"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
+"lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
+), chunk_opts = list(label = "setup", include = FALSE)), setup = NULL, 
+    chunks = list(list(label = "make_glm_prediction", code = "sppcount_glm <- glm(species~pollution, family = \"poisson\", data=sppcount)\nsppcount_fit <- makeFun(sppcount_glm)\nsppcount_fit(pollution = 3.64, se.fit= TRUE)", 
+        opts = list(label = "\"make_glm_prediction\"", exercise = "TRUE"), 
+        engine = "r")), code_check = NULL, error_check = NULL, 
+    check = NULL, solution = NULL, tests = NULL, options = list(
+        eval = FALSE, echo = TRUE, results = "markup", tidy = FALSE, 
+        tidy.opts = NULL, collapse = FALSE, prompt = FALSE, comment = NA, 
+        highlight = FALSE, size = "normalsize", background = "#F7F7F7", 
+        strip.white = TRUE, cache = 0, cache.path = "NES2505_GLM_cache/html/", 
+        cache.vars = NULL, cache.lazy = TRUE, dependson = NULL, 
+        autodep = FALSE, cache.rebuild = FALSE, fig.keep = "high", 
+        fig.show = "asis", fig.align = "default", fig.path = "NES2505_GLM_files/figure-html/", 
+        dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
+        fig.width = 6.5, fig.height = 4, fig.env = "figure", 
+        fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
+        fig.pos = "", out.width = 624, out.height = NULL, out.extra = NULL, 
+        fig.retina = 2, external = TRUE, sanitize = FALSE, interval = 1, 
+        aniopts = "controls,loop", warning = TRUE, error = FALSE, 
+        message = TRUE, render = NULL, ref.label = NULL, child = NULL, 
+        engine = "r", split = FALSE, include = TRUE, purl = TRUE, 
+        max.print = 1000, label = "make_glm_prediction", exercise = TRUE, 
+        code = c("sppcount_glm <- glm(species~pollution, family = \"poisson\", data=sppcount)", 
+        "sppcount_fit <- makeFun(sppcount_glm)", "sppcount_fit(pollution = 3.64, se.fit= TRUE)"
+        ), out.width.px = 624, out.height.px = 384, params.src = "make_glm_prediction, exercise=TRUE", 
+        fig.num = 0, exercise.df_print = "paged", exercise.checker = "NULL"), 
+    engine = "r", version = "4"), class = c("r", "tutorial_exercise"
+)))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "recode", question = structure("Looking at the summary output above, what might be useful to do before\nvisualising and analysing the data?", html = TRUE, class = c("html", 
-"character")), answers = list(structure(list(id = "lnr_ans_2795114", 
+"character")), answers = list(structure(list(id = "lnr_ans_45bd84b", 
     option = "Since pH uses a log scale, it is essential to log-transform\n                the calcium content", 
     value = "Since pH uses a log scale, it is essential to log-transform\n                the calcium content", 
     label = structure("Since pH uses a log scale, it is essential to log-transform\nthe calcium content", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. Whilst pH does use log, it is\nbased on hydrogen-ion concentration not calcium", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_645ef5b", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_a3563f3", 
     option = "Standardise the air pollution to zero mean and unit standard\n                deviation", 
     value = "Standardise the air pollution to zero mean and unit standard\n                deviation", 
     label = structure("Standardise the air pollution to zero mean and unit standard\ndeviation", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No, this is not essential, although be\naware that this is sometimes useful if the explanatory variables\nare on very different scales", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_3ef1865", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_d624976", 
     option = "Standardise the calcium to zero mean and unit standard\n                deviation", 
     value = "Standardise the calcium to zero mean and unit standard\n                deviation", 
     label = structure("Standardise the calcium to zero mean and unit standard\ndeviation", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No, this is not essential, although be\naware that this is sometimes useful if the explanatory variables\nare on very different scales", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_977b9ac", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_de138b", 
     option = "Convert the presence and absence of lichen to a factor", 
     value = "Convert the presence and absence of lichen to a factor", 
     label = structure("Convert the presence and absence of lichen to a factor", html = TRUE, class = c("html", 
@@ -1190,7 +1228,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
 "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", 
 "character")), message = NULL, post_message = NULL), ids = list(
     answer = "recode-answer", question = "recode"), loading = NULL, 
-    random_answer_order = FALSE, allow_retry = TRUE, seed = 341487900.340982, 
+    random_answer_order = FALSE, allow_retry = TRUE, seed = 1157036796.46121, 
     options = list()), class = c("learnr_radio", "tutorial_question"
 )), session = session)
 </script>
@@ -1286,19 +1324,19 @@ learnr:::store_exercise_cache(structure(list(label = "boxplot_airpoll", global_s
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "which_lichen_model", 
     question = structure("Which term(s) should be removed for the simpler model?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_31e222", 
+    "character")), answers = list(structure(list(id = "lnr_ans_22d0924", 
         option = "All terms are non-significant terms, therefore we cannot make\n                a simpler model", 
         value = "All terms are non-significant terms, therefore we cannot make\n                a simpler model", 
         label = structure("All terms are non-significant terms, therefore we cannot make\na simpler model", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("No. Always look at the interaction\nterm first", html = TRUE, class = c("html", 
         "character")), type = "literal"), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_b1246e4", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_1b9c67c", 
         option = "Only keep airpoll as it appears to be most important", 
         value = "Only keep airpoll as it appears to be most important", 
         label = structure("Only keep airpoll as it appears to be most important", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("No.\nSince the interaction term is non-significant it should be\nremoved first", html = TRUE, class = c("html", 
         "character")), type = "literal"), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_4838a1d", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_5431e34", 
         option = "The interaction term should be removed first and the new model\n                tested", 
         value = "The interaction term should be removed first and the new model\n                tested", 
         label = structure("The interaction term should be removed first and the new model\ntested", html = TRUE, class = c("html", 
@@ -1312,7 +1350,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
     "character")), message = NULL, post_message = NULL), ids = list(
         answer = "which_lichen_model-answer", question = "which_lichen_model"), 
     loading = NULL, random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 861340204.098907, options = list()), class = c("learnr_radio", 
+    seed = 1298766851.89521, options = list()), class = c("learnr_radio", 
 "tutorial_question")), session = session)
 </script>
  
@@ -1352,48 +1390,6 @@ learnr:::store_exercise_cache(structure(list(label = "simpler_lichen_glm", globa
         engine = "r", split = FALSE, include = TRUE, purl = TRUE, 
         max.print = 1000, label = "simpler_lichen_glm", exercise = TRUE, 
         code = "", out.width.px = 624, out.height.px = 384, params.src = "simpler_lichen_glm, exercise=TRUE", 
-        fig.num = 0L, exercise.df_print = "paged", exercise.checker = "NULL"), 
-    engine = "r", version = "4"), class = c("r", "tutorial_exercise"
-)))
-</script>
- 
-<script type="application/shiny-prerendered" data-context="server">
-`tutorial-exercise-compare_lichens-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-compare_lichens-code-editor`)), session)
-output$`tutorial-exercise-compare_lichens-output` <- renderUI({
-  `tutorial-exercise-compare_lichens-result`()
-})
-</script>
-
-
-<script type="application/shiny-prerendered" data-context="server">
-learnr:::store_exercise_cache(structure(list(label = "compare_lichens", global_setup = structure(c("library(learnr)", 
-"library(mosaic)", "sppcount <- read.csv(\"Data/sppcount.csv\")", 
-"lichens_dat  <- read.csv(\"Data/lichen.csv\")", "knitr::opts_chunk$set(echo = FALSE)"
-), chunk_opts = list(label = "setup", include = FALSE)), setup = "lichen_glm1 <- glm(lichen ~ calcium * airpoll, family=binomial, data=lichens_dat)\nlichen_glm2 <- glm(lichen ~ calcium + airpoll, family=binomial, data=lichens_dat)", 
-    chunks = list(list(label = "compare_lichens-setup", code = "lichen_glm1 <- glm(lichen ~ calcium * airpoll, family=binomial, data=lichens_dat)\nlichen_glm2 <- glm(lichen ~ calcium + airpoll, family=binomial, data=lichens_dat)", 
-        opts = list(label = "\"compare_lichens-setup\""), engine = "r"), 
-        list(label = "compare_lichens", code = "", opts = list(
-            label = "\"compare_lichens\"", exercise = "TRUE"), 
-            engine = "r")), code_check = NULL, error_check = NULL, 
-    check = NULL, solution = structure("anova(lichen_glm1, lichen_glm2, test=\"Chi\")", chunk_opts = list(
-        label = "compare_lichens-solution")), tests = NULL, options = list(
-        eval = FALSE, echo = TRUE, results = "markup", tidy = FALSE, 
-        tidy.opts = NULL, collapse = FALSE, prompt = FALSE, comment = NA, 
-        highlight = FALSE, size = "normalsize", background = "#F7F7F7", 
-        strip.white = TRUE, cache = 0, cache.path = "NES2505_GLM_cache/html/", 
-        cache.vars = NULL, cache.lazy = TRUE, dependson = NULL, 
-        autodep = FALSE, cache.rebuild = FALSE, fig.keep = "high", 
-        fig.show = "asis", fig.align = "default", fig.path = "NES2505_GLM_files/figure-html/", 
-        dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
-        fig.width = 6.5, fig.height = 4, fig.env = "figure", 
-        fig.cap = NULL, fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
-        fig.pos = "", out.width = 624, out.height = NULL, out.extra = NULL, 
-        fig.retina = 2, external = TRUE, sanitize = FALSE, interval = 1, 
-        aniopts = "controls,loop", warning = TRUE, error = FALSE, 
-        message = TRUE, render = NULL, ref.label = NULL, child = NULL, 
-        engine = "r", split = FALSE, include = TRUE, purl = TRUE, 
-        max.print = 1000, label = "compare_lichens", exercise = TRUE, 
-        code = "", out.width.px = 624, out.height.px = 384, params.src = "compare_lichens, exercise=TRUE", 
         fig.num = 0L, exercise.df_print = "paged", exercise.checker = "NULL"), 
     engine = "r", version = "4"), class = c("r", "tutorial_exercise"
 )))
@@ -1447,7 +1443,7 @@ learnr:::store_exercise_cache(structure(list(label = "lichen_fit_and_plot2", glo
 <!--/html_preserve-->
 <!--html_preserve-->
 <script type="application/shiny-prerendered" data-context="execution_dependencies">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88]}},"value":[{"type":"character","attributes":{},"value":["backports","base","bslib","cachem","checkmate","cli","colorspace","commonmark","compiler","datasets","digest","dplyr","ellipsis","evaluate","fansi","farver","fastmap","fontawesome","forcats","generics","ggforce","ggformula","ggplot2","ggridges","ggstance","glue","graphics","grDevices","grid","gtable","haven","highr","hms","htmltools","htmlwidgets","httpuv","jquerylib","jsonlite","knitr","labeling","labelled","later","lattice","learnr","lifecycle","magrittr","markdown","MASS","Matrix","memoise","methods","mgcv","mime","mosaic","mosaicCore","mosaicData","munsell","nlme","pillar","pkgconfig","polyclip","promises","purrr","R6","Rcpp","rlang","rmarkdown","rprojroot","rstudioapi","sass","scales","shiny","splines","stats","stringi","stringr","tibble","tidyr","tidyselect","tools","tweenr","utf8","utils","vctrs","withr","xfun","xtable","yaml"]},{"type":"character","attributes":{},"value":["1.4.1","4.3.1","0.5.0","1.0.8","2.2.0","3.6.1","2.1-0","1.9.0","4.3.1","4.3.1","0.6.31","1.1.2","0.3.2","0.21","1.0.4","2.1.1","1.1.1","0.5.1","1.0.0","0.1.3","0.4.1","0.10.4","3.4.2","0.5.4","0.3.6","1.6.2","4.3.1","4.3.1","4.3.1","0.3.3","2.5.2","0.10","1.1.3","0.5.5","1.6.2","1.6.11","0.1.4","1.8.5","1.43","0.4.2","2.11.0","1.3.1","0.21-8","0.11.4","1.0.3","2.0.3","1.7","7.3-60","1.5-4.1","2.0.1","4.3.1","1.8-42","0.12","1.8.4.2","0.9.2.1","0.20.3","0.5.0","3.1-162","1.9.0","2.0.3","1.10-4","1.2.0.1","1.0.1","2.5.1","1.0.10","1.1.1","2.22","2.0.3","0.14","0.4.6","1.2.1","1.7.4","4.3.1","4.3.1","1.7.12","1.5.0","3.2.1","1.3.0","1.2.0","4.3.1","2.0.2","1.2.3","4.3.1","0.6.3","2.5.0","0.39","1.8-4","2.3.7"]}]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90]}},"value":[{"type":"character","attributes":{},"value":["backports","base","broom","bslib","cachem","checkmate","cli","colorspace","commonmark","compiler","datasets","digest","dplyr","ellipsis","evaluate","fansi","farver","fastmap","fontawesome","forcats","generics","ggforce","ggformula","ggplot2","ggrepel","ggridges","ggstance","glue","graphics","grDevices","grid","gtable","haven","highr","hms","htmltools","htmlwidgets","httpuv","jquerylib","jsonlite","knitr","labeling","labelled","later","lattice","learnr","lifecycle","magrittr","markdown","MASS","Matrix","memoise","methods","mgcv","mime","mosaic","mosaicCore","mosaicData","munsell","nlme","pillar","pkgconfig","polyclip","promises","purrr","R6","Rcpp","rlang","rmarkdown","rprojroot","rstudioapi","sass","scales","shiny","splines","stats","stringi","stringr","tibble","tidyr","tidyselect","tools","tweenr","utf8","utils","vctrs","withr","xfun","xtable","yaml"]},{"type":"character","attributes":{},"value":["1.4.1","4.3.1","1.0.5","0.5.0","1.0.8","2.2.0","3.6.1","2.1-0","1.9.0","4.3.1","4.3.1","0.6.31","1.1.2","0.3.2","0.21","1.0.4","2.1.1","1.1.1","0.5.1","1.0.0","0.1.3","0.4.1","0.10.4","3.4.2","0.9.3","0.5.4","0.3.6","1.6.2","4.3.1","4.3.1","4.3.1","0.3.3","2.5.2","0.10","1.1.3","0.5.5","1.6.2","1.6.11","0.1.4","1.8.5","1.43","0.4.2","2.11.0","1.3.1","0.21-8","0.11.4","1.0.3","2.0.3","1.7","7.3-60","1.5-4.1","2.0.1","4.3.1","1.8-42","0.12","1.8.4.2","0.9.2.1","0.20.3","0.5.0","3.1-162","1.9.0","2.0.3","1.10-4","1.2.0.1","1.0.1","2.5.1","1.0.10","1.1.1","2.22","2.0.3","0.14","0.4.6","1.2.1","1.7.4","4.3.1","4.3.1","1.7.12","1.5.0","3.2.1","1.3.0","1.2.0","4.3.1","2.0.2","1.2.3","4.3.1","0.6.3","2.5.0","0.39","1.8-4","2.3.7"]}]}]}
 </script>
 <!--/html_preserve-->
 </div>
